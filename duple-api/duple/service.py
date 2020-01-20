@@ -153,17 +153,19 @@ async def training_post(request):
     return web.Response(status=400)
 
 
-@routes.get("/download")
-async def download(request):
+@routes.get("/results")
+async def results(request):
     if worker.datastore.has_result:
-        result = worker.datastore.result.to_json(orient='table')
+        result = worker.datastore.result
+        result = result[result.cluster_id > 0].to_json(orient='table')
         return web.Response(body=result, content_type='application/json')
     else:
         if await worker.datastore.get_status('training'):
             message = messaage_wrapper({"training_complete": True})
             await app["message_queue"].put(message)
         if await worker.datastore.get_status('dedupe'):
-            result = worker.datastore.result.to_json(orient='table')
+            result = worker.datastore.result
+            result = result[result.cluster_id > 0].to_json(orient='table')
             return web.Response(body=result, content_type='application/json')
 
 

@@ -17,6 +17,7 @@ from dataclasses import dataclass
 @dataclass
 class DataStore:
     pairs_buffer: list
+    stats: dict
     updating: bool = False
     has_result: bool = False
     training_complete: bool = False
@@ -24,6 +25,7 @@ class DataStore:
 
     async def sample(self, filepath):
         self.data_frame = pd.read_csv(filepath)
+        self.stats.update({"records": self.data_frame.shape[1]})
 
         # FIXME: Hack for Date fields, needs some mechanism for specifying types.
         self.data_frame["date_of_birth"] = pd.to_datetime(
@@ -52,7 +54,8 @@ class DataStore:
     async def dedupe(self):
         self.updating = True
         logger.warning("TODO: Use original df here?")
-        self.result = dedupe_deduplicate(self.deduper, self.data_frame)
+        self.result, duplicates = dedupe_deduplicate(self.deduper, self.data_frame)
+        self.stats.update({"duplicates": duplicates})
         self.dedupe_complete = True
         self.has_result = True
         self.updating = False
@@ -69,7 +72,7 @@ class DataStore:
         return status.get(item)
 
 
-datastore = DataStore([])
+datastore = DataStore([], {})
 
 
 async def producer(queue, message):

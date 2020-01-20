@@ -31,7 +31,7 @@ def data_cluster(deduper, data_dict, threshold):
     clustered_df = pd.DataFrame(df_data)
     clustered_df = clustered_df.set_index("id")
 
-    return clustered_df
+    return clustered_df, len(duplicates)
 
 
 def dedupe_prep(fields):
@@ -81,11 +81,11 @@ def dedupe_train(deduper, client_id="test1234"):
         deduper.writeSettings(sf)
 
 
-def dedupe_deduplicate(deduper, df, recall_weight=1):
+def dedupe_deduplicate(deduper, df, recall_weight=0.75):
     df, data_d = data_prep(df)
     threshold = deduper.threshold(data_d, recall_weight=recall_weight)
-    clustered_df = data_cluster(deduper, data_d, threshold)
+    clustered_df, duplicates = data_cluster(deduper, data_d, threshold)
     results = df.join(clustered_df, how="left")
     results.drop(["dictionary"], axis=1, inplace=True)
 
-    return results
+    return results, duplicates

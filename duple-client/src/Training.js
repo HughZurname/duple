@@ -79,7 +79,7 @@ const Training = props => {
                         justify='center'>
                         <Text>
                             Training completed. You will be redirected to the
-                            downloads page to await your results.
+                            results page to await your results.
                         </Text>
                         <Box
                             direction='row'
@@ -94,7 +94,7 @@ const Training = props => {
                                     getTraining.doFetch().then(setAttempts(0))
                                 }
                             />
-                            <RoutedButton primary to='/download' label='Okay' />
+                            <RoutedButton primary to='/results' label='Okay' />
                         </Box>
                     </Box>
                 </Layer>

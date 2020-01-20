@@ -16,6 +16,7 @@ import useLocalStorage from './useLocalStorage'
 import RoutedAnchor from './RoutedAnchor'
 import Training from './Training'
 import Upload from './Upload'
+import Results from './Results'
 
 function App() {
     const [openNotification, setOpenNotification] = React.useState()
@@ -46,7 +47,7 @@ function App() {
                             icon={<Robot />}
                             hoverIndicator></RoutedAnchor>
                         <RoutedAnchor
-                            to='/download'
+                            to='/results'
                             icon={<CloudDownload />}
                             hoverIndicator></RoutedAnchor>
                     </Heading>
@@ -79,8 +80,8 @@ function App() {
                         <Route path='/upload'>
                             <Upload />
                         </Route>
-                        <Route path='/download'>
-                            <Heading>Download</Heading>
+                        <Route path='/results'>
+                            <Results />
                         </Route>
                         <Route path='/'>
                             <Heading>Home</Heading>
