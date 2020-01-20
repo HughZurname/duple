@@ -95,7 +95,7 @@ async def training_get(request):
             description: successful operation. Return unlabeled training records.
     """
     logger.debug("Training data request recieved")
-    if app["labeling_attempts"] < 3:
+    if app["labeling_attempts"] <= 3:
         training_data = await worker.datastore.get_pairs()
         return web.json_response(training_data)
     else:
