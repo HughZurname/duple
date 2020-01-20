@@ -3,8 +3,7 @@ import { useFetch } from '@bjornagh/use-fetch'
 
 import { Grommet, Box, Button, Layer, Text } from 'grommet'
 import { grommet } from 'grommet/themes'
-
-// import { ReactComponent as Logo } from './logo.svg'
+import Loader from 'react-loader-spinner'
 
 import useLocalStorage from './useLocalStorage'
 import RoutedButton from './RoutedButton'
@@ -71,7 +70,7 @@ const Training = props => {
                         })
                 }}
             />
-            {attempts > 3 && (
+            {attempts >= 3 && (
                 <Layer full>
                     <Box
                         fill
@@ -100,7 +99,11 @@ const Training = props => {
                     </Box>
                 </Layer>
             )}
-            {getTraining.fetching && <Text>Loading...</Text>}
+            {getTraining.fetching && (
+                <Box align='center' margin='xlarge'>
+                    <Loader type='Triangle' color='#7D4CDB' height={60} />
+                </Box>
+            )}
             {!getTraining.fetching && getTraining.data && (
                 <TrainingTable
                     data={getTraining.data}

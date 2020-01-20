@@ -11,12 +11,12 @@ import asyncio
 import signal
 
 
-def route_cors(app):
+def route_cors(host, app):
     logger.info("Configuring cors")
     cors = aiohttp_cors.setup(
         app,
         defaults={
-            "*": aiohttp_cors.ResourceOptions(
+            host: aiohttp_cors.ResourceOptions(
                 allow_credentials=True, expose_headers="*", allow_headers="*"
             )
         },
@@ -46,7 +46,7 @@ async def health_get(request):
 
 
 @routes.post("/upload")
-async def upload_post(request):
+async def upload(request):
     """File upload endpoint.
 
     ---
@@ -95,7 +95,8 @@ async def training_get(request):
             description: successful operation. Return unlabeled training records.
     """
     logger.info("Training data request recieved")
-    return web.json_response(worker.datastore.training_buffer)
+    training_data = await worker.datastore.get_pairs()
+    return web.json_response(training_data)
 
 
 @routes.post("/training")
@@ -138,15 +139,32 @@ async def training_post(request):
     """
     if request.body_exists and request.can_read_body:
         logger.info("Labelled training data recieved.")
-        if worker.datastore.training_attempts <= 3:
-            logger.info("Updating traing pairs for labelling")
-            #TODO: Make this use the message queue for training
-            await worker.datastore.pairs(await request.json())
+        if app["labeling_attempts"] < 3:
+            logger.info("Updating traing pairs for labeling")
+            labeled_pairs = await request.json()
+            message = messaage_wrapper({"labeled_pairs": labeled_pairs})
+            await app["message_queue"].put(message)
+            app["labeling_attempts"] += 1
         else:
-            logger.error("TODO: Deduplication task init")
+            message = messaage_wrapper({"labeling_complete": True})
+            await app["message_queue"].put(message)
         return web.Response(status=201)
 
     return web.Response(status=400)
+
+
+@routes.get("/download")
+async def download(request):
+    if worker.datastore.has_result:
+        result = worker.datastore.result.to_json(orient='table')
+        return web.Response(body=result, content_type='application/json')
+    else:
+        if await worker.datastore.get_status('training'):
+            message = messaage_wrapper({"training_complete": True})
+            await app["message_queue"].put(message)
+        if await worker.datastore.get_status('dedupe'):
+            result = worker.datastore.result.to_json(orient='table')
+            return web.Response(body=result, content_type='application/json')
 
 
 async def message_push(queue):
@@ -156,17 +174,10 @@ async def message_push(queue):
             message = await app["message_queue"].get()
             asyncio.create_task(worker.producer(queue, message))
         except Exception as e:
-            logger.error(f"Failed to get messages with error: {e}")
+            logger.error(f"Failed to queue message with error: {e}")
 
 
-async def on_startup(app):
-    app["worker_queue"] = asyncio.Queue()
-    app["message_queue"] = asyncio.Queue()
-    asyncio.create_task(message_push(app["worker_queue"]))
-    asyncio.create_task(worker.consumer(app["worker_queue"]))
-
-
-async def on_shutdown(app):
+async def shutdown(loop, signal=None):
     """Cleanup tasks tied to the service's shutdown."""
     if signal:
         logger.info(f"Received exit signal, shutting down.")
@@ -179,11 +190,25 @@ async def on_shutdown(app):
     logger.info(f"Stopping")
 
 
+async def on_startup(app):
+    app["labeling_attempts"] = 1
+    app["worker_queue"] = asyncio.Queue()
+    app["message_queue"] = asyncio.Queue()
+    asyncio.create_task(message_push(app["worker_queue"]))
+    asyncio.create_task(worker.consumer(app["worker_queue"]))
+    loop = asyncio.get_running_loop()
+    loop.set_exception_handler(shutdown)
+
+
+async def on_shutdown(app):
+    await shutdown(asyncio.get_running_loop())
+
+
 def init():
     app.add_routes(routes)
     app.on_startup.append(on_startup)
     app.on_shutdown.append(on_shutdown)
-    route_cors(app)
+    route_cors("*", app)
     setup_swagger(
         app,
         description="API for duple data deduplication tool",

@@ -1,5 +1,6 @@
 import React from 'react'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
+
 import { Grommet, Main, Box, Drop, Heading, Header } from 'grommet'
 import { grommet } from 'grommet/themes'
 import {
@@ -8,13 +9,13 @@ import {
     CloudUpload,
     CloudDownload,
     Robot,
-    CatalogOption,
 } from 'grommet-icons'
+import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css'
 
 import useLocalStorage from './useLocalStorage'
 import RoutedAnchor from './RoutedAnchor'
 import Training from './Training'
-import UploadForm from './UploadForm'
+import Upload from './Upload'
 
 function App() {
     const [openNotification, setOpenNotification] = React.useState()
@@ -37,12 +38,12 @@ function App() {
                             icon={<Home />}
                             hoverIndicator></RoutedAnchor>
                         <RoutedAnchor
-                            to='/training'
-                            icon={<Robot />}
-                            hoverIndicator></RoutedAnchor>
-                        <RoutedAnchor
                             to='/upload'
                             icon={<CloudUpload />}
+                            hoverIndicator></RoutedAnchor>
+                        <RoutedAnchor
+                            to='/training'
+                            icon={<Robot />}
                             hoverIndicator></RoutedAnchor>
                         <RoutedAnchor
                             to='/download'
@@ -64,7 +65,7 @@ function App() {
                         align={{ top: 'bottom', right: 'left' }}
                         target={notificationRef.current}>
                         <Box round pad='small'>
-                            Notifications go here
+                            No new notifications
                         </Box>
                     </Drop>
                 )}
@@ -72,16 +73,14 @@ function App() {
                     <Switch>
                         <Route path='/training'>
                             <Training
-                                full
                                 state={{ attempts: [attempts, setAttempts] }}
                             />
                         </Route>
                         <Route path='/upload'>
-                            <UploadForm />
+                            <Upload />
                         </Route>
                         <Route path='/download'>
                             <Heading>Download</Heading>
-                            <CatalogOption />
                         </Route>
                         <Route path='/'>
                             <Heading>Home</Heading>

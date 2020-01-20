@@ -1,6 +1,13 @@
 from duple import logger
 from duple.message import MessageType
-from duple.deduplicate import training_pairs, data_prep, deduper_prep, deduper_sample
+from duple.deduplicate import (
+    dedupe_prep,
+    dedupe_sample,
+    dedupe_pairs,
+    dedupe_mark,
+    dedupe_train,
+    dedupe_deduplicate,
+)
 
 import asyncio
 import pandas as pd
@@ -9,8 +16,11 @@ from dataclasses import dataclass
 
 @dataclass
 class DataStore:
-    training_buffer: list
-    training_attempts: int
+    pairs_buffer: list
+    updating: bool = False
+    has_result: bool = False
+    training_complete: bool = False
+    dedupe_complete: bool = False
 
     async def sample(self, filepath):
         self.data_frame = pd.read_csv(filepath)
@@ -20,52 +30,102 @@ class DataStore:
             self.data_frame["date_of_birth"], errors="coerce", format="%d/%m/%Y"
         )
         fields = ["given_name", "surname", ["date_of_birth", "DateTime"], "sex"]
-        # fields = self.data_frame.columns
         # hack ends
 
-        self.data_frame, data_dict = data_prep(self.data_frame)
-        self.deduper = deduper_prep(fields)
-        deduper_sample(self.deduper, data_dict)
-        self.training_buffer = training_pairs(self.deduper)
+        self.deduper = dedupe_prep(fields)
+        dedupe_sample(self.deduper, self.data_frame)
+        self.pairs_buffer = dedupe_pairs(self.deduper)
 
-    async def pairs(self, labelled_pairs):
-        self.deduper.markPairs(labelled_pairs)
-        self.training_buffer = training_pairs(self.deduper)
-        self.training_attempts += 1
+    async def pairs(self, labeled_pairs):
+        self.updating = True
+        dedupe_mark(self.deduper, labeled_pairs)
+        self.pairs_buffer = dedupe_pairs(self.deduper)
+        self.updating = False
+
+    async def train(self):
+        self.updating = True
+        logger.warning("TODO: Add client id to messages")
+        dedupe_train(self.deduper)
+        self.training_complete = True
+        self.updating = False
+
+    async def dedupe(self):
+        self.updating = True
+        logger.warning("TODO: Use original df here?")
+        self.result = dedupe_deduplicate(self.deduper, self.data_frame)
+        self.dedupe_complete = True
+        self.has_result = True
+        self.updating = False
+
+    async def get_pairs(self):
+        while self.updating:
+            asyncio.sleep(1)
+        return self.pairs_buffer
+
+    async def get_status(self, item):
+        status = {"training": self.training_complete, "dedupe": self.dedupe_complete}
+        while self.updating:
+            asyncio.sleep(1)
+        return status.get(item)
 
 
-datastore = DataStore([], 0)
+datastore = DataStore([])
 
 
 async def producer(queue, message):
-    """[summary].
+    """Process messagees and schedule worker work items.
 
     [description]
     """
-    logger.debug(
-        "Producing job for message (%s) with state (%s)",
+    logger.info(
+        "Scheduling work item for %s message (%s)",
+        message.message_type.name,
         message.message_id,
-        message.state.name,
     )
-    if message.state == MessageType.NEW and message.data["filepath"]:
-        message.state = MessageType.SAMPLE
-        asyncio.create_task(queue.put(message))
+    if message.message_type == MessageType.NEW and message.data:
+        if message.data.get("filepath"):
+            message.message_type = MessageType.SAMPLE
+            asyncio.create_task(queue.put(message))
+        elif message.data.get("labeled_pairs"):
+            message.message_type = MessageType.LABEL
+            asyncio.create_task(queue.put(message))
+        elif message.data.get("labeling_complete"):
+            message.message_type = MessageType.TRAIN
+            asyncio.create_task(queue.put(message))
+        elif message.data.get("training_complete"):
+            message.message_type = MessageType.DEDUPE
+            asyncio.create_task(queue.put(message))
+        else:
+            logger.error(
+                "Unable to schedule message (%s). Unknown message data %s",
+                message.message_id,
+                message.data,
+            )
+    else:
+        logger.error("Unable to schedule message %s", message)
 
 
 async def consumer(queue):
-    """[summary].
+    """Consume scheduled work items.
 
     [description]
     """
     while True:
         message = await queue.get()
-        logger.debug(
-            "Consuming job for message (%s) with state (%s)",
+        logger.info(
+            "Processing work item for %s message (%s)",
+            message.message_type.name,
             message.message_id,
-            message.state.name,
         )
-        if message.state == MessageType.CANCEL:
-            break
-        if message.state == MessageType.SAMPLE:
-            await datastore.sample(message.data["filepath"])
+        if message.message_type == MessageType.SAMPLE:
+            await datastore.sample(message.data.get("filepath"))
+            queue.task_done()
+        if message.message_type == MessageType.LABEL:
+            await datastore.pairs(message.data.get("labeled_pairs"))
+            queue.task_done()
+        if message.message_type == MessageType.TRAIN:
+            await datastore.train()
+            queue.task_done()
+        if message.message_type == MessageType.DEDUPE:
+            await datastore.dedupe()
             queue.task_done()

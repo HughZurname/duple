@@ -3,6 +3,7 @@ from enum import Enum
 import attr
 import uuid
 
+
 class MessageType(Enum):
     """Job status enum for test job execution.
 
@@ -10,26 +11,24 @@ class MessageType(Enum):
         Enum
 
     Variables:
-        CANCEL {number} -- Cancelled Message. All work stops immediately
-        NEW {number} -- Initial Message state.
+        NEW {number} -- Initial Message type.
         SAMPLE {number} -- Sampling Message. Sampling input data for training.
-        TRAIN {number} -- Training Message. Acvtive training phase.
+        LABEL {number} -- Labeling Message. Acvtive training phase.
+        TRAIN {number} -- Training Message. Complete training phase.
         DEDUPE {number} -- Deduplication Message. Deduplicating data with trained model.
-        DONE {number} -- Message is complete.
     """
 
-    CANCEL = 1
-    NEW = 2
-    SAMPLE = 3
+    NEW = 1
+    SAMPLE = 2
+    LABEL = 3
     TRAIN = 4
     DEDUPE = 5
-    DONE = 6
 
 
 @attr.s
 class Message:
     message_id = attr.ib(repr=False)
-    state = attr.ib(validator=attr.validators.in_(MessageType))
+    message_type = attr.ib(validator=attr.validators.in_(MessageType))
     data = attr.ib()
 
 

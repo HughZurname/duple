@@ -106,7 +106,7 @@ const UploadForm = props => {
                         <Text>
                             Classification data successfully uploaded. Your data
                             is being processed and will be redirected to the
-                            home page to await training.
+                            training page to begin training.
                         </Text>
                         <Box
                             direction='row'
@@ -115,7 +115,7 @@ const UploadForm = props => {
                                 vertical: 'small',
                                 horizontal: 'medium',
                             }}>
-                            <RoutedButton primary to='/' label='Okay' />
+                            <RoutedButton primary to='/training' label='Okay' />
                         </Box>
                     </Box>
                 </Layer>

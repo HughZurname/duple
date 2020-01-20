@@ -89,8 +89,9 @@ const TrainingTable = props => {
     }
 
     return (
-        <Grommet theme={grommet} full>
+        <Grommet theme={grommet}>
             <DataTable
+                style={{ width: '100%' }}
                 columns={[
                     ...columns,
                     {
