@@ -4,36 +4,46 @@ import { Grommet, Box, Button, Text } from 'grommet'
 import { grommet } from 'grommet/themes'
 
 const TrainingStatus = props => {
-    const [positiveIds] = props.state.positiveIds
-    const [negativeIds] = props.state.negativeIds
-    const [attempts] = props.state.attempts
+    const positiveIds = props.state.positiveIds
+    const negativeIds = props.state.negativeIds
+    const attempts = props.state.attempts
 
     return (
         <Grommet theme={grommet}>
             <Box direction='row' justify='between'>
-                <Text size='large'>{`${positiveIds.length}/5 postive`}</Text>
+                <Text
+                    style={{ width: '8em', textAlign: 'start' }}
+                    size='large'>{`${positiveIds.length} postive`}</Text>
                 <Box direction='column' align='center'>
-                    <Text size='large'>Training</Text>
-                    <Text size='large'>{`${attempts}/3 attempts`}</Text>
+                    <Text
+                        style={{ width: '8em', textAlign: 'center' }}
+                        size='large'>
+                        Training
+                    </Text>
+                    <Text
+                        style={{ width: '8em', textAlign: 'center' }}
+                        size='large'>{`${attempts}/3 attempts`}</Text>
                     <Box
                         direction='row'
                         gap='small'
                         pad={{
                             vertical: 'small',
-                            horizontal: 'medium'
+                            horizontal: 'medium',
                         }}>
+                        <Button
+                            label='Clear'
+                            onClick={() => props.handleClear()}
+                        />
                         <Button
                             primary
                             label='Submit'
                             onClick={() => props.handleSubmit()}
                         />
-                        <Button
-                            label='Clear'
-                            onClick={() => props.handleClear()}
-                        />
                     </Box>
                 </Box>
-                <Text size='large'>{`${negativeIds.length}/5 negative`}</Text>
+                <Text
+                    style={{ width: '8em', textAlign: 'end' }}
+                    size='large'>{`${negativeIds.length} negative`}</Text>
             </Box>
         </Grommet>
     )

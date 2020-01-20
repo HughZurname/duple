@@ -1,5 +1,5 @@
-from deduplicator import logger
-from deduplicator.utility import clean_df, select_fields
+from duple import logger
+from duple.utility import clean_df, select_fields
 
 import pandas as pd
 
@@ -9,7 +9,7 @@ import dedupe
 
 
 def train_console(settings_file, training_file, data, fields, sample_size):
-    logger.info("Starting training phase...")
+    logger.info("Starting training phase")
 
     if os.path.exists(settings_file):
         logger.info("Existing settings found. Loading from: %s", settings_file)
@@ -20,7 +20,7 @@ def train_console(settings_file, training_file, data, fields, sample_size):
         deduper = dedupe.Dedupe(fields)
         sample_num = math.floor(len(data) * sample_size)
 
-        logger.info("Extracting data sample of %s records...", sample_num)
+        logger.info("Extracting data sample of %s records", sample_num)
         deduper.sample(data, sample_num)
 
         if os.path.exists(training_file):
@@ -28,7 +28,7 @@ def train_console(settings_file, training_file, data, fields, sample_size):
             with open(training_file, "rb") as f:
                 deduper.readTraining(f)
 
-        logger.info("Starting active labeling...")
+        logger.info("Starting active labeling")
 
         dedupe.consoleLabel(deduper)
 
@@ -43,21 +43,21 @@ def train_console(settings_file, training_file, data, fields, sample_size):
 
 
 def deduper_prep(fields):
-    logger.info("Preparing deduper training phase...")
+    logger.info("Preparing deduper training phase")
     fields = select_fields(fields)
     return dedupe.Dedupe(fields)
 
 
-def deduper_sample(deduper, data_dict, sample_size):
-    logger.info("Getting candidate training matches...")
+def deduper_sample(deduper, data_dict, sample_size=0.3):
+    logger.info("Getting candidate training matches")
     sample_num = math.floor(len(data_dict) * sample_size)
 
-    logger.info("Extracting data sample of %s records...", sample_num)
+    logger.info("Extracting data sample of %s records", sample_num)
     deduper.sample(data_dict, sample_num)
 
 
 def training_pairs(deduper, pairs=10):
-    logger.info("Retrieving pairs for client labeling...")
+    logger.info("Retrieving pairs for client labeling")
 
     return [
         {"pair_id": i, "records": {"record": m1, "match": m2}}
@@ -67,7 +67,7 @@ def training_pairs(deduper, pairs=10):
 
 
 def cluster(deduper, data, threshold):
-    logger.info("Clustering data...")
+    logger.info("Clustering data")
     duplicates = deduper.match(data, threshold)
     logger.info("Duplicate records found: %d", len(duplicates))
 
@@ -84,7 +84,7 @@ def cluster(deduper, data, threshold):
 
 
 def data_prep(df):
-    logger.debug("Preparing data and dictionary for deduplication...")
+    logger.info("Preparing data and dictionary for deduplication")
     df = clean_df(df)
     df["dictionary"] = df.to_dict("records")
     data_d = dict(zip(df.index, df.dictionary))

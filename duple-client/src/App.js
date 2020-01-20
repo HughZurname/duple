@@ -7,14 +7,18 @@ import {
     Notification,
     CloudUpload,
     CloudDownload,
-    Robot
+    Robot,
+    CatalogOption,
 } from 'grommet-icons'
 
+import useLocalStorage from './useLocalStorage'
 import RoutedAnchor from './RoutedAnchor'
 import Training from './Training'
+import UploadForm from './UploadForm'
 
 function App() {
     const [openNotification, setOpenNotification] = React.useState()
+    const [attempts, setAttempts] = useLocalStorage('attempts', 0)
     const notificationRef = React.useRef(null)
 
     return (
@@ -67,13 +71,17 @@ function App() {
                 <Main pad='small'>
                     <Switch>
                         <Route path='/training'>
-                            <Training full />
+                            <Training
+                                full
+                                state={{ attempts: [attempts, setAttempts] }}
+                            />
                         </Route>
                         <Route path='/upload'>
-                            <Heading>Upload</Heading>
+                            <UploadForm />
                         </Route>
                         <Route path='/download'>
                             <Heading>Download</Heading>
+                            <CatalogOption />
                         </Route>
                         <Route path='/'>
                             <Heading>Home</Heading>

@@ -1,10 +1,10 @@
 import setuptools
 
 setuptools.setup(
-    name="deduper",
+    name="duple",
     version="0.01",
     description="Data deduplicator using dedupe.io library and pandas",
-    url="http://github.com/HughZurname/deduper",
+    url="http://github.com/HughZurname/duple",
     author="Qonda Ltd.",
     author_email="info@qonda.io",
     license="GNU GPLv3",
@@ -13,6 +13,7 @@ setuptools.setup(
         "pandas",
         "unidecode",
         "aiohttp[speedups]",
+        "aiohttp-swagger[performance]",
         "aiohttp-cors",
     ],
     packages=setuptools.find_packages(),

@@ -7,15 +7,25 @@ import { UserExpert, UserAdd } from 'grommet-icons'
 const columns = [
     {
         property: 'pair_id',
-        header: 'ID'
+        header: 'ID',
     },
     {
         property: 'records',
         header: 'Records',
         render: datum => (
             <Box gap='xsmall'>
-                <Box round direction='row' justify='between' align='center' basis='xxsmall' background='dark-3'>
-                    <UserExpert size='2em' color='light-1' style={{ paddingLeft: '1em', paddingRight: '1em' }}/>
+                <Box
+                    round
+                    direction='row'
+                    justify='between'
+                    align='center'
+                    basis='xxsmall'
+                    background='dark-3'>
+                    <UserExpert
+                        size='2em'
+                        color='light-1'
+                        style={{ paddingLeft: '1em', paddingRight: '1em' }}
+                    />
                     <Text style={{ width: '5em' }}>
                         {datum.records.record.given_name}
                     </Text>
@@ -29,8 +39,17 @@ const columns = [
                         {datum.records.record.sex}
                     </Text>
                 </Box>
-                <Box round direction='row' justify='between' align='center' basis='xxsmall' background='light-2'>
-                    <UserAdd size='2em' style={{ paddingLeft: '1em', paddingRight: '1em' }}/>
+                <Box
+                    round
+                    direction='row'
+                    justify='between'
+                    align='center'
+                    basis='xxsmall'
+                    background='light-2'>
+                    <UserAdd
+                        size='2em'
+                        style={{ paddingLeft: '1em', paddingRight: '1em' }}
+                    />
                     <Text style={{ width: '5em' }}>
                         {datum.records.match.given_name}
                     </Text>
@@ -45,8 +64,8 @@ const columns = [
                     </Text>
                 </Box>
             </Box>
-        )
-    }
+        ),
+    },
 ]
 
 const TrainingTable = props => {
@@ -86,7 +105,7 @@ const TrainingTable = props => {
                             />
                         ),
                         header: 'Correct',
-                        sortable: false
+                        sortable: false,
                     },
                     {
                         property: 'negativeIds',
@@ -100,8 +119,8 @@ const TrainingTable = props => {
                             />
                         ),
                         header: 'Incorrect',
-                        sortable: false
-                    }
+                        sortable: false,
+                    },
                 ].map(col => ({ ...col }))}
                 data={props.data}
             />

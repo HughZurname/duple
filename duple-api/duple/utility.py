@@ -1,10 +1,10 @@
-from deduplicator import logger
+from duple import logger
 
 from unidecode import unidecode
 
 
 def select_fields(fields):
-    logger.info("Generating data field mappings...")
+    logger.info("Generating data field mappings")
 
     def gen_field(field):
         if type(field) == str:
@@ -16,7 +16,7 @@ def select_fields(fields):
 
 
 def clean_df(df):
-    logger.info("Cleaning dataframe...")
+    logger.info("Cleaning dataframe")
     df = df.astype(str)
     df = df.applymap(lambda x: x.replace(r"[^a-zA-Z0-9/-]", ""))
     df = df.applymap(lambda x: unidecode(x))
