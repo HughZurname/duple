@@ -161,7 +161,7 @@ async def training_post(request):
 async def results(request):
     if worker.datastore.has_result:
         result = worker.datastore.result
-        result = result[result.cluster_id > 0].to_json(orient="table")
+        result = result[result.cluster_id > 0].sort_values('cluster_id').to_json(orient="table")
         return web.Response(body=result, content_type="application/json")
     else:
         if await worker.datastore.get_status("training"):
@@ -169,7 +169,7 @@ async def results(request):
             await app["message_queue"].put(message)
         if await worker.datastore.get_status("dedupe"):
             result = worker.datastore.result
-            result = result[result.cluster_id > 0].to_json(orient="table")
+            result = result[result.cluster_id > 0].sort_values('cluster_id').to_json(orient="table")
             return web.Response(body=result, content_type="application/json")
 
 

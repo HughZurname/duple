@@ -12,9 +12,6 @@ const Results = props => {
     const stats = useFetch({
         url: 'http://localhost:8080/stats',
     })
-    const { data, fetching } = useFetch({
-        url: 'http://localhost:8080/results/file',
-    })
     return (
         <Grommet theme={grommet}>
             <Box direction='row' justify='between' pad='medium'>
@@ -32,7 +29,6 @@ const Results = props => {
                     </Box>
                 )}
                 <Box direction='column' align='center' gap='small'>
-                    {console.log(data, fetching)}
                     <Text
                         style={{ width: '8em', textAlign: 'center' }}
                         size='large'>
@@ -87,9 +83,7 @@ const Results = props => {
                                     <Meter
                                         values={[
                                             {
-                                                value: (
-                                                    datum.confidence * 100
-                                                ).toFixed(2),
+                                                value: datum.confidence * 100,
                                             },
                                         ]}
                                         thickness='medium'
@@ -102,6 +96,7 @@ const Results = props => {
                         },
                     ]}
                     data={results.data.data}
+                    step={50}
                 />
             )}
         </Grommet>
