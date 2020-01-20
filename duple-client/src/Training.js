@@ -100,8 +100,12 @@ const Training = props => {
                 </Layer>
             )}
             {getTraining.fetching && (
-                <Box align='center' margin='xlarge'>
+                <Box align='center' margin='xlarge' gap='large'>
                     <Loader type='Triangle' color='#7D4CDB' height={60} />
+                    <Text>
+                        Please wait while the training model is updated and
+                        unlabeled examples are retrieved...
+                    </Text>
                 </Box>
             )}
             {!getTraining.fetching && getTraining.data && (

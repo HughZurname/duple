@@ -12,16 +12,27 @@ const Results = props => {
     const stats = useFetch({
         url: 'http://localhost:8080/stats',
     })
-    const file = useFetch({
-        url: 'http://localhost:8080/stats',
+    const { data, fetching } = useFetch({
+        url: 'http://localhost:8080/results/file',
     })
     return (
         <Grommet theme={grommet}>
             <Box direction='row' justify='between' pad='medium'>
-                <Text
-                    style={{ width: '8em', textAlign: 'start' }}
-                    size='medium'>{`11123 records processed`}</Text>
+                {stats.fetching && <Text>Loading...</Text>}
+                {!stats.fetching && stats.data && (
+                    <Box direction='column' align='center' gap='small'>
+                        <Text
+                            style={{ width: '8em', textAlign: 'start' }}
+                            size='medium'>
+                            {stats.data.records}
+                        </Text>
+                        <Text style={{ width: '8em', textAlign: 'start' }}>
+                            records processed
+                        </Text>
+                    </Box>
+                )}
                 <Box direction='column' align='center' gap='small'>
+                    {console.log(data, fetching)}
                     <Text
                         style={{ width: '8em', textAlign: 'center' }}
                         size='large'>
@@ -31,16 +42,29 @@ const Results = props => {
                         gap='medium'
                         primary
                         label='Download'
-                        onClick={() => console.log('Download!')}
+                        href='http://localhost:8080/results/file'
                     />
                 </Box>
-                <Text
-                    style={{ width: '8em', textAlign: 'end' }}
-                    size='medium'>{`1000 duplicates found`}</Text>
+                {stats.fetching && <Text>Loading...</Text>}
+                {!stats.fetching && stats.data && (
+                    <Box direction='column' align='center' gap='small'>
+                        <Text
+                            style={{ width: '8em', textAlign: 'end' }}
+                            size='medium'>
+                            {stats.data.duplicates}
+                        </Text>
+                        <Text style={{ width: '8em', textAlign: 'end' }}>
+                            duplicates found
+                        </Text>
+                    </Box>
+                )}
             </Box>
             {results.fetching && (
-                <Box align='center' margin='xlarge'>
+                <Box align='center' margin='xlarge' gap='large'>
                     <Loader type='Triangle' color='#7D4CDB' height={60} />
+                    <Text>
+                        Please wait while your data is scanned for duplicates...
+                    </Text>
                 </Box>
             )}
             {!results.fetching && results.data && (

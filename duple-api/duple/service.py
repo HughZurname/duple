@@ -2,6 +2,7 @@ from duple import logger
 from duple.message import messaage_wrapper
 import duple.worker as worker
 
+from multidict import MultiDict
 from aiohttp import web
 from aiohttp_swagger import setup_swagger
 import aiohttp_cors
@@ -172,12 +173,30 @@ async def results(request):
             return web.Response(body=result, content_type="application/json")
 
 
+@routes.get("/results/file")
+async def results_file(request):
+    if worker.datastore.has_result:
+        result = worker.datastore.result
+        result = result[result.cluster_id > 0].to_csv(mode="wb", index=False)
+        return web.Response(
+            headers=MultiDict(
+                {
+                    "Content-Disposition": 'attachment; filename="relateddata.csv"',
+                    "Content-Type": "text/csv",
+                }
+            ),
+            body=result,
+        )
+    else:
+        return web.Response(status=503)
+
+
 @routes.get("/stats")
 async def stats(request):
     if worker.datastore.has_result:
-        pass
+        return web.json_response(worker.datastore.stats)
     else:
-        pass
+        return web.json_response({})
 
 
 async def message_push(queue):

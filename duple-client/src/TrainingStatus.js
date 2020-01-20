@@ -11,9 +11,16 @@ const TrainingStatus = props => {
     return (
         <Grommet theme={grommet}>
             <Box direction='row' justify='between'>
-                <Text
-                    style={{ width: '8em', textAlign: 'start' }}
-                    size='large'>{`${positiveIds.length} postive`}</Text>
+                <Box direction='column' align='center' gap='small'>
+                    <Text
+                        style={{ width: '8em', textAlign: 'start' }}
+                        size='medium'>
+                        {positiveIds.length}
+                    </Text>
+                    <Text style={{ width: '8em', textAlign: 'start' }}>
+                        positive
+                    </Text>
+                </Box>
                 <Box direction='column' align='center'>
                     <Text
                         style={{ width: '8em', textAlign: 'center' }}
@@ -41,9 +48,16 @@ const TrainingStatus = props => {
                         />
                     </Box>
                 </Box>
-                <Text
-                    style={{ width: '8em', textAlign: 'end' }}
-                    size='large'>{`${negativeIds.length} negative`}</Text>
+                <Box direction='column' align='center' gap='small'>
+                    <Text
+                        style={{ width: '8em', textAlign: 'end' }}
+                        size='medium'>
+                        {negativeIds.length}
+                    </Text>
+                    <Text style={{ width: '8em', textAlign: 'end' }}>
+                        negative
+                    </Text>
+                </Box>
             </Box>
         </Grommet>
     )

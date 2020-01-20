@@ -25,7 +25,7 @@ class DataStore:
 
     async def sample(self, filepath):
         self.data_frame = pd.read_csv(filepath)
-        self.stats.update({"records": self.data_frame.shape[1]})
+        self.stats.update({"records": self.data_frame.shape[0]})
 
         # FIXME: Hack for Date fields, needs some mechanism for specifying types.
         self.data_frame["date_of_birth"] = pd.to_datetime(
@@ -62,13 +62,13 @@ class DataStore:
 
     async def get_pairs(self):
         while self.updating:
-            asyncio.sleep(1)
+            await asyncio.sleep(1)
         return self.pairs_buffer
 
     async def get_status(self, item):
         status = {"training": self.training_complete, "dedupe": self.dedupe_complete}
         while self.updating:
-            asyncio.sleep(1)
+            await asyncio.sleep(1)
         return status.get(item)
 
 
