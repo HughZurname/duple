@@ -6,8 +6,14 @@ import { grommet } from 'grommet/themes'
 import Loader from 'react-loader-spinner'
 
 const Results = props => {
-    const { data, fetching } = useFetch({
+    const results = useFetch({
         url: 'http://localhost:8080/results',
+    })
+    const stats = useFetch({
+        url: 'http://localhost:8080/stats',
+    })
+    const file = useFetch({
+        url: 'http://localhost:8080/stats',
     })
     return (
         <Grommet theme={grommet}>
@@ -16,6 +22,11 @@ const Results = props => {
                     style={{ width: '8em', textAlign: 'start' }}
                     size='medium'>{`11123 records processed`}</Text>
                 <Box direction='column' align='center' gap='small'>
+                    <Text
+                        style={{ width: '8em', textAlign: 'center' }}
+                        size='large'>
+                        Results
+                    </Text>
                     <Button
                         gap='medium'
                         primary
@@ -27,12 +38,12 @@ const Results = props => {
                     style={{ width: '8em', textAlign: 'end' }}
                     size='medium'>{`1000 duplicates found`}</Text>
             </Box>
-            {fetching && (
+            {results.fetching && (
                 <Box align='center' margin='xlarge'>
                     <Loader type='Triangle' color='#7D4CDB' height={60} />
                 </Box>
             )}
-            {!fetching && data && (
+            {!results.fetching && results.data && (
                 <DataTable
                     size='full'
                     style={{ width: '100%' }}
@@ -66,7 +77,7 @@ const Results = props => {
                             ),
                         },
                     ]}
-                    data={data.data}
+                    data={results.data.data}
                 />
             )}
         </Grommet>

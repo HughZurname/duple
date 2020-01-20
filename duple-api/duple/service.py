@@ -8,7 +8,6 @@ import aiohttp_cors
 
 import os
 import asyncio
-import signal
 
 
 def route_cors(host, app):
@@ -59,7 +58,7 @@ async def upload(request):
         "200":
             description: successful operation. Return confirmation response.
     """
-    logger.info("Recieving data for classification")
+    logger.debug("Recieving data for classification")
     reader = await request.multipart()
     field = await reader.next()
     assert field.name == "duple_data"
@@ -67,6 +66,7 @@ async def upload(request):
     filepath = os.path.join("profile-data/", field.filename)
     size = 0
 
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
     with open(filepath, "wb") as f:
         while True:
             chunk = await field.read_chunk()
@@ -94,9 +94,12 @@ async def training_get(request):
         "200":
             description: successful operation. Return unlabeled training records.
     """
-    logger.info("Training data request recieved")
-    training_data = await worker.datastore.get_pairs()
-    return web.json_response(training_data)
+    logger.debug("Training data request recieved")
+    if app["labeling_attempts"] < 3:
+        training_data = await worker.datastore.get_pairs()
+        return web.json_response(training_data)
+    else:
+        return web.json_response([])
 
 
 @routes.post("/training")
@@ -138,7 +141,7 @@ async def training_post(request):
                 - $ref: '#/definitions/Person'
     """
     if request.body_exists and request.can_read_body:
-        logger.info("Labelled training data recieved.")
+        logger.debug("Labelled training data recieved.")
         if app["labeling_attempts"] < 3:
             logger.info("Updating traing pairs for labeling")
             labeled_pairs = await request.json()
@@ -157,21 +160,29 @@ async def training_post(request):
 async def results(request):
     if worker.datastore.has_result:
         result = worker.datastore.result
-        result = result[result.cluster_id > 0].to_json(orient='table')
-        return web.Response(body=result, content_type='application/json')
+        result = result[result.cluster_id > 0].to_json(orient="table")
+        return web.Response(body=result, content_type="application/json")
     else:
-        if await worker.datastore.get_status('training'):
+        if await worker.datastore.get_status("training"):
             message = messaage_wrapper({"training_complete": True})
             await app["message_queue"].put(message)
-        if await worker.datastore.get_status('dedupe'):
+        if await worker.datastore.get_status("dedupe"):
             result = worker.datastore.result
-            result = result[result.cluster_id > 0].to_json(orient='table')
-            return web.Response(body=result, content_type='application/json')
+            result = result[result.cluster_id > 0].to_json(orient="table")
+            return web.Response(body=result, content_type="application/json")
+
+
+@routes.get("/stats")
+async def stats(request):
+    if worker.datastore.has_result:
+        pass
+    else:
+        pass
 
 
 async def message_push(queue):
     while True:
-        await asyncio.sleep(5)
+        await asyncio.sleep(1)
         try:
             message = await app["message_queue"].get()
             asyncio.create_task(worker.producer(queue, message))
