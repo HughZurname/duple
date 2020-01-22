@@ -4,9 +4,9 @@ import { Grommet, Box, Button, Text } from 'grommet'
 import { grommet } from 'grommet/themes'
 
 const TrainingStatus = props => {
-    const positiveIds = props.state.positiveIds
-    const negativeIds = props.state.negativeIds
-    const attempts = props.state.attempts
+    const positiveIds = props.positiveIds
+    const negativeIds = props.negativeIds
+    const attempts = props.attempts
 
     return (
         <Grommet theme={grommet}>

@@ -1,19 +1,23 @@
 import React from 'react'
-import { useFetch } from '@bjornagh/use-fetch'
 
-import { Grommet, Box, Button, Layer, Text } from 'grommet'
+import { Grommet, Box, Layer, Text } from 'grommet'
 import { grommet } from 'grommet/themes'
 import Loader from 'react-loader-spinner'
 
-import useLocalStorage from './useLocalStorage'
+import useSessionStorage from './useSessionStorage'
+import useDupleFetch from './useDupleFetch'
 import RoutedButton from './RoutedButton'
 import TrainingTable from './TrainingTable'
 import TrainingStatus from './TrainingStatus'
 
 const Training = props => {
-    const [positiveIds, setPositiveIds] = useLocalStorage('positiveIds', [])
-    const [negativeIds, setNegativeIds] = useLocalStorage('negativeIds', [])
-    const [attempts, setAttempts] = props.state.attempts
+    const [positiveIds, setPositiveIds] = useSessionStorage('positiveIds', [])
+    const [negativeIds, setNegativeIds] = useSessionStorage('negativeIds', [])
+    const [attempts, setAttempts] = useSessionStorage('attempts', 0)
+    const [trainingComplete, setTrainingComplete] = useSessionStorage(
+        'trainingComplete',
+        false
+    )
 
     const processMatches = (data, negativeIds, positiveIds) => ({
         match: reduceData(data, positiveIds),
@@ -30,11 +34,11 @@ const Training = props => {
             return accumulator
         }, [])
 
-    const getTraining = useFetch({
-        url: 'http://localhost:8080/training',
+    const getTraining = useDupleFetch({
+        url: '/training',
     })
-    const postTraining = useFetch({
-        url: 'http://localhost:8080/training',
+    const postTraining = useDupleFetch({
+        url: '/training',
         method: 'POST',
         init: {
             headers: {
@@ -46,7 +50,9 @@ const Training = props => {
     return (
         <Grommet theme={grommet}>
             <TrainingStatus
-                state={{ positiveIds, negativeIds, attempts }}
+                positiveIds={positiveIds}
+                negativeIds={negativeIds}
+                attempts={attempts}
                 handleClear={() => {
                     setPositiveIds([])
                     setNegativeIds([])
@@ -61,16 +67,18 @@ const Training = props => {
                             ),
                         })
                         .then(response => {
-                            if (response.ok && attempts < 3) {
-                                setAttempts(attempts + 1)
-                                setPositiveIds([])
-                                setNegativeIds([])
-                                getTraining.doFetch()
+                            if (response.ok) {
+                                if (attempts < 3) {
+                                    setAttempts(attempts + 1)
+                                    setPositiveIds([])
+                                    setNegativeIds([])
+                                    getTraining.doFetch()
+                                } else setTrainingComplete(true)
                             }
                         })
                 }}
             />
-            {attempts >= 3 && (
+            {trainingComplete && (
                 <Layer full>
                     <Box
                         fill
@@ -88,11 +96,18 @@ const Training = props => {
                                 vertical: 'small',
                                 horizontal: 'medium',
                             }}>
-                            <Button
+                            <RoutedButton
                                 label='New Session'
-                                onClick={() =>
-                                    getTraining.doFetch().then(setAttempts(0))
-                                }
+                                to='/upload'
+                                onClick={() => {
+                                    if (trainingComplete)
+                                        fetch(
+                                            'http://localhost:8080/reset'
+                                        ).then(response => {
+                                            if (response.ok) setAttempts(0)
+                                            setTrainingComplete(false)
+                                        })
+                                }}
                             />
                             <RoutedButton primary to='/results' label='Okay' />
                         </Box>

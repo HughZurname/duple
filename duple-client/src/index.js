@@ -4,8 +4,11 @@ import App from './App'
 import * as serviceWorker from './serviceWorker'
 
 import { FetchProvider } from '@bjornagh/use-fetch'
+import uniqid from 'uniqid'
 
 const cache = new Map()
+
+window.localStorage.setItem('clientId', uniqid())
 
 ReactDOM.render(
     <FetchProvider cache={cache}>

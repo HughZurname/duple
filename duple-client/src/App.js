@@ -12,7 +12,6 @@ import {
 } from 'grommet-icons'
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css'
 
-import useLocalStorage from './useLocalStorage'
 import RoutedAnchor from './RoutedAnchor'
 import Training from './Training'
 import Upload from './Upload'
@@ -20,7 +19,6 @@ import Results from './Results'
 
 function App() {
     const [openNotification, setOpenNotification] = React.useState()
-    const [attempts, setAttempts] = useLocalStorage('attempts', 0)
     const notificationRef = React.useRef(null)
 
     return (
@@ -73,9 +71,7 @@ function App() {
                 <Main pad='small'>
                     <Switch>
                         <Route path='/training'>
-                            <Training
-                                state={{ attempts: [attempts, setAttempts] }}
-                            />
+                            <Training />
                         </Route>
                         <Route path='/upload'>
                             <Upload />

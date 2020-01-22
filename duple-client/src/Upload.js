@@ -1,5 +1,4 @@
 import React, { useCallback } from 'react'
-import { useFetch } from '@bjornagh/use-fetch'
 import { useDropzone } from 'react-dropzone'
 
 import { Grommet, Box, Heading, Text, Button, Layer } from 'grommet'
@@ -7,7 +6,8 @@ import { grommet } from 'grommet/themes'
 import styled from 'styled-components'
 
 import RoutedButton from './RoutedButton'
-import useLocalStorage from './useLocalStorage'
+import useSessionStorage from './useSessionStorage'
+import useDupleFetch from './useDupleFetch'
 
 const getColor = props => {
     if (props.isDragAccept) return '#00e676'
@@ -77,12 +77,15 @@ const FileDropzone = props => {
 
 const UploadForm = props => {
     const formData = new FormData()
-    const postData = useFetch({
-        url: 'http://localhost:8080/upload',
+    const postData = useDupleFetch({
+        url: '/upload',
         method: 'POST',
     })
     const [files, setFiles] = React.useState([])
-    const [success, setSuccess] = useLocalStorage('uploadSuccess', false)
+    const [uploadSuccess, setUploadSuccess] = useSessionStorage(
+        'uploadSuccess',
+        false
+    )
 
     const handleSubmit = event => {
         event.preventDefault()
@@ -90,13 +93,13 @@ const UploadForm = props => {
             formData.append('duple_data', file)
         })
         postData.doFetch({ body: formData }).then(response => {
-            if (response.ok) setSuccess(true)
+            if (response.ok) setUploadSuccess(true)
         })
     }
 
     return (
         <Grommet theme={grommet}>
-            {success && (
+            {uploadSuccess && (
                 <Layer full>
                     <Box
                         fill
@@ -115,6 +118,17 @@ const UploadForm = props => {
                                 vertical: 'small',
                                 horizontal: 'medium',
                             }}>
+                            <Button
+                                label='New Upload'
+                                onClick={() => {
+                                    fetch('http://localhost:8080/reset').then(
+                                        response => {
+                                            if (response.ok)
+                                                setUploadSuccess(false)
+                                        }
+                                    )
+                                }}
+                            />
                             <RoutedButton primary to='/training' label='Okay' />
                         </Box>
                     </Box>
@@ -130,11 +144,6 @@ const UploadForm = props => {
                             justify='center'
                             gap='small'
                             margin={{ top: 'medium' }}>
-                            <Button
-                                label='Reset'
-                                type='reset'
-                                onClick={() => console.log('Reset!')}
-                            />
                             <Button type='submit' label='Upload' primary />
                         </Box>
                     </form>
