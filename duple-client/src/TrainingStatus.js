@@ -38,10 +38,12 @@ const TrainingStatus = props => {
                             horizontal: 'medium',
                         }}>
                         <Button
+                            disabled={props.fetching}
                             label='Clear'
                             onClick={() => props.handleClear()}
                         />
                         <Button
+                            disabled={props.fetching}
                             primary
                             label='Submit'
                             onClick={() => props.handleSubmit()}

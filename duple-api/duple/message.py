@@ -27,10 +27,11 @@ class MessageType(Enum):
 
 @attr.s
 class Message:
+    client_id = attr.ib()
     message_id = attr.ib(repr=False)
     message_type = attr.ib(validator=attr.validators.in_(MessageType))
     data = attr.ib()
 
 
-def messaage_wrapper(data, message_state=None):
-    return Message(uuid.uuid4(), message_state or MessageType.NEW, data)
+def messaage_wrapper(client_id, data, message_state=None):
+    return Message(client_id, uuid.uuid4(), message_state or MessageType.NEW, data)

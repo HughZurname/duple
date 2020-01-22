@@ -1,6 +1,8 @@
 from duple import logger
 from duple.message import messaage_wrapper
+from duple.datastore import get_datastore, delete_datastore
 import duple.worker as worker
+
 
 from multidict import MultiDict
 from aiohttp import web
@@ -9,6 +11,9 @@ import aiohttp_cors
 
 import os
 import asyncio
+
+routes = web.RouteTableDef()
+app = web.Application()
 
 
 def route_cors(host, app):
@@ -22,10 +27,6 @@ def route_cors(host, app):
         },
     )
     [cors.add(route) for route in list(app.router.routes())]
-
-
-routes = web.RouteTableDef()
-app = web.Application()
 
 
 @routes.get("/health")
@@ -59,12 +60,13 @@ async def upload(request):
         "200":
             description: successful operation. Return confirmation response.
     """
+    client_id = request.headers.get("clientId")
     logger.debug("Recieving data for classification")
     reader = await request.multipart()
     field = await reader.next()
     assert field.name == "duple_data"
     assert field.headers["Content-Type"] == "text/csv" or "application/vnd.ms-excel"
-    filepath = os.path.join("profile-data/", field.filename)
+    filepath = os.path.join("profile-data/", client_id, field.filename)
     size = 0
 
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
@@ -75,8 +77,8 @@ async def upload(request):
                 break
             size += len(chunk)
             f.write(chunk)
-
-    message = messaage_wrapper({"filepath": filepath})
+    app[client_id] = {'attempts': 1}
+    message = messaage_wrapper(client_id, {"filepath": filepath})
     await app["message_queue"].put(message)
     return web.json_response({"recieved": field.filename, "size": size})
 
@@ -96,8 +98,10 @@ async def training_get(request):
             description: successful operation. Return unlabeled training records.
     """
     logger.debug("Training data request recieved")
-    if app["labeling_attempts"] <= 3:
-        training_data = await worker.datastore.get_pairs()
+    client_id = request.headers.get("clientId")
+    datastore = get_datastore(client_id)
+    if app[client_id]["attempts"] <= 3:
+        training_data = await datastore.get_pairs()
         return web.json_response(training_data)
     else:
         return web.json_response([])
@@ -143,14 +147,15 @@ async def training_post(request):
     """
     if request.body_exists and request.can_read_body:
         logger.debug("Labelled training data recieved.")
-        if app["labeling_attempts"] < 3:
+        client_id = request.headers.get("clientId")
+        if app[client_id]["attempts"] < 3:
             logger.info("Updating traing pairs for labeling")
             labeled_pairs = await request.json()
-            message = messaage_wrapper({"labeled_pairs": labeled_pairs})
+            message = messaage_wrapper(client_id, {"labeled_pairs": labeled_pairs})
             await app["message_queue"].put(message)
-            app["labeling_attempts"] += 1
+            app[client_id]["attempts"] += 1
         else:
-            message = messaage_wrapper({"labeling_complete": True})
+            message = messaage_wrapper(client_id, {"labeling_complete": True})
             await app["message_queue"].put(message)
         return web.Response(status=201)
 
@@ -159,24 +164,36 @@ async def training_post(request):
 
 @routes.get("/results")
 async def results(request):
-    if worker.datastore.has_result:
-        result = worker.datastore.result
-        result = result[result.cluster_id > 0].sort_values('cluster_id').to_json(orient="table")
+    client_id = request.headers.get("clientId")
+    datastore = get_datastore(client_id)
+    if datastore.has_result:
+        result = datastore.result
+        result = (
+            result[result.cluster_id > 0]
+            .sort_values("cluster_id")
+            .to_json(orient="table")
+        )
         return web.Response(body=result, content_type="application/json")
     else:
-        if await worker.datastore.get_status("training"):
-            message = messaage_wrapper({"training_complete": True})
+        if await datastore.get_status("training"):
+            message = messaage_wrapper(client_id, {"training_complete": True})
             await app["message_queue"].put(message)
-        if await worker.datastore.get_status("dedupe"):
-            result = worker.datastore.result
-            result = result[result.cluster_id > 0].sort_values('cluster_id').to_json(orient="table")
+        if await datastore.get_status("dedupe"):
+            result = datastore.result
+            result = (
+                result[result.cluster_id > 0]
+                .sort_values("cluster_id")
+                .to_json(orient="table")
+            )
             return web.Response(body=result, content_type="application/json")
 
 
 @routes.get("/results/file")
 async def results_file(request):
-    if worker.datastore.has_result:
-        result = worker.datastore.result
+    params = request.rel_url.query  #request.headers.get("clientId")
+    datastore = get_datastore(params.get('clientId'))
+    if datastore.has_result:
+        result = datastore.result
         result = result[result.cluster_id > 0].to_csv(mode="wb", index=False)
         return web.Response(
             headers=MultiDict(
@@ -193,10 +210,21 @@ async def results_file(request):
 
 @routes.get("/stats")
 async def stats(request):
-    if worker.datastore.has_result:
-        return web.json_response(worker.datastore.stats)
+    client_id = request.headers.get("clientId")
+    datastore = get_datastore(client_id)
+    if datastore.has_result:
+        return web.json_response(datastore.stats)
     else:
         return web.json_response({})
+
+
+@routes.get("/reset")
+async def reset(request):
+    client_id = request.headers.get("clientId")
+    delete_datastore(client_id)
+    if app.get(client_id):
+        app[client_id]["attempts"] = 0
+    return web.json_response({"reset": "OK"})
 
 
 async def message_push(queue):
@@ -209,7 +237,14 @@ async def message_push(queue):
             logger.error(f"Failed to queue message with error: {e}")
 
 
-async def shutdown(loop, signal=None):
+async def on_startup(app):
+    app["worker_queue"] = asyncio.Queue()
+    app["message_queue"] = asyncio.Queue()
+    asyncio.create_task(message_push(app["worker_queue"]))
+    asyncio.create_task(worker.consumer(app["worker_queue"]))
+
+
+async def on_shutdown(app, signal=None):
     """Cleanup tasks tied to the service's shutdown."""
     if signal:
         logger.info(f"Received exit signal, shutting down.")
@@ -220,20 +255,6 @@ async def shutdown(loop, signal=None):
 
     await asyncio.gather(*tasks, return_exceptions=True)
     logger.info(f"Stopping")
-
-
-async def on_startup(app):
-    app["labeling_attempts"] = 1
-    app["worker_queue"] = asyncio.Queue()
-    app["message_queue"] = asyncio.Queue()
-    asyncio.create_task(message_push(app["worker_queue"]))
-    asyncio.create_task(worker.consumer(app["worker_queue"]))
-    loop = asyncio.get_running_loop()
-    loop.set_exception_handler(shutdown)
-
-
-async def on_shutdown(app):
-    await shutdown(asyncio.get_running_loop())
 
 
 def init():

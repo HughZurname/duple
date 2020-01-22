@@ -13,8 +13,9 @@ import {
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css'
 
 import RoutedAnchor from './RoutedAnchor'
-import Training from './Training'
+import Start from './Start'
 import Upload from './Upload'
+import Training from './Training'
 import Results from './Results'
 
 function App() {
@@ -80,7 +81,7 @@ function App() {
                             <Results />
                         </Route>
                         <Route path='/'>
-                            <Heading>Home</Heading>
+                            <Start />
                         </Route>
                     </Switch>
                 </Main>

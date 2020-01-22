@@ -1,78 +1,7 @@
 from duple import logger
-from duple.message import MessageType
-from duple.deduplicate import (
-    dedupe_prep,
-    dedupe_sample,
-    dedupe_pairs,
-    dedupe_mark,
-    dedupe_train,
-    dedupe_deduplicate,
-)
-
 import asyncio
-import pandas as pd
-from dataclasses import dataclass
-
-
-@dataclass
-class DataStore:
-    pairs_buffer: list
-    stats: dict
-    updating: bool = False
-    has_result: bool = False
-    training_complete: bool = False
-    dedupe_complete: bool = False
-
-    async def sample(self, filepath):
-        self.data_frame = pd.read_csv(filepath)
-        self.stats.update({"records": self.data_frame.shape[0]})
-
-        # FIXME: Hack for Date fields, needs some mechanism for specifying types.
-        self.data_frame["date_of_birth"] = pd.to_datetime(
-            self.data_frame["date_of_birth"], errors="coerce", format="%d/%m/%Y"
-        )
-        fields = ["given_name", "surname", ["date_of_birth", "DateTime"], "sex"]
-        # hack ends
-
-        self.deduper = dedupe_prep(fields)
-        dedupe_sample(self.deduper, self.data_frame)
-        self.pairs_buffer = dedupe_pairs(self.deduper)
-
-    async def pairs(self, labeled_pairs):
-        self.updating = True
-        dedupe_mark(self.deduper, labeled_pairs)
-        self.pairs_buffer = dedupe_pairs(self.deduper)
-        self.updating = False
-
-    async def train(self):
-        self.updating = True
-        logger.warning("TODO: Add client id to messages")
-        dedupe_train(self.deduper)
-        self.training_complete = True
-        self.updating = False
-
-    async def dedupe(self):
-        self.updating = True
-        logger.warning("TODO: Use original df here?")
-        self.result, duplicates = dedupe_deduplicate(self.deduper, self.data_frame)
-        self.stats.update({"duplicates": duplicates})
-        self.dedupe_complete = True
-        self.has_result = True
-        self.updating = False
-
-    async def get_pairs(self):
-        while self.updating:
-            await asyncio.sleep(1)
-        return self.pairs_buffer
-
-    async def get_status(self, item):
-        status = {"training": self.training_complete, "dedupe": self.dedupe_complete}
-        while self.updating:
-            await asyncio.sleep(1)
-        return status.get(item)
-
-
-datastore = DataStore([], {})
+from duple.message import MessageType
+from duple.datastore import get_datastore
 
 
 async def producer(queue, message):
@@ -81,8 +10,9 @@ async def producer(queue, message):
     [description]
     """
     logger.info(
-        "Scheduling work item for %s message (%s)",
+        "Scheduling %s work item for client %s message (%s)",
         message.message_type.name,
+        message.client_id,
         message.message_id,
     )
     if message.message_type == MessageType.NEW and message.data:
@@ -115,9 +45,11 @@ async def consumer(queue):
     """
     while True:
         message = await queue.get()
+        datastore = get_datastore(message.client_id)
         logger.info(
-            "Processing work item for %s message (%s)",
+            "Processing %s work item for client %s message (%s)",
             message.message_type.name,
+            message.client_id,
             message.message_id,
         )
         if message.message_type == MessageType.SAMPLE:
@@ -127,7 +59,7 @@ async def consumer(queue):
             await datastore.pairs(message.data.get("labeled_pairs"))
             queue.task_done()
         if message.message_type == MessageType.TRAIN:
-            await datastore.train()
+            await datastore.train(message.client_id)
             queue.task_done()
         if message.message_type == MessageType.DEDUPE:
             await datastore.dedupe()

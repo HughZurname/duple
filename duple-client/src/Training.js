@@ -13,7 +13,7 @@ import TrainingStatus from './TrainingStatus'
 const Training = props => {
     const [positiveIds, setPositiveIds] = useSessionStorage('positiveIds', [])
     const [negativeIds, setNegativeIds] = useSessionStorage('negativeIds', [])
-    const [attempts, setAttempts] = useSessionStorage('attempts', 0)
+    const [attempts, setAttempts] = useSessionStorage('attempts', 1)
     const [trainingComplete, setTrainingComplete] = useSessionStorage(
         'trainingComplete',
         false
@@ -50,6 +50,7 @@ const Training = props => {
     return (
         <Grommet theme={grommet}>
             <TrainingStatus
+                fetching={getTraining.fetching || postTraining.fetching}
                 positiveIds={positiveIds}
                 negativeIds={negativeIds}
                 attempts={attempts}
@@ -104,7 +105,7 @@ const Training = props => {
                                         fetch(
                                             'http://localhost:8080/reset'
                                         ).then(response => {
-                                            if (response.ok) setAttempts(0)
+                                            if (response.ok) setAttempts(1)
                                             setTrainingComplete(false)
                                         })
                                 }}

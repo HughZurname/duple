@@ -1,16 +1,17 @@
 import React from 'react'
-import { useFetch } from '@bjornagh/use-fetch'
 
 import { Grommet, Box, Meter, DataTable, Button, Text } from 'grommet'
 import { grommet } from 'grommet/themes'
 import Loader from 'react-loader-spinner'
 
+import useDupleFetch from './useDupleFetch'
+
 const Results = props => {
-    const results = useFetch({
-        url: 'http://localhost:8080/results',
+    const results = useDupleFetch({
+        url: '/results',
     })
-    const stats = useFetch({
-        url: 'http://localhost:8080/stats',
+    const stats = useDupleFetch({
+        url: '/stats',
     })
     return (
         <Grommet theme={grommet}>
@@ -35,10 +36,13 @@ const Results = props => {
                         Results
                     </Text>
                     <Button
+                        disabled={results.fetching}
                         gap='medium'
                         primary
                         label='Download'
-                        href='http://localhost:8080/results/file'
+                        href={`http://localhost:8080/results/file?clientId=${window.localStorage.getItem(
+                            'clientId'
+                        )}`}
                     />
                 </Box>
                 {stats.fetching && <Text>Loading...</Text>}
