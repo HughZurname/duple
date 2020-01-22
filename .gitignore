@@ -234,5 +234,4 @@ templates/
 
 # Techtest
 INSTRUCTIONS.md
-duple-api/profile-data/*
-duple-api/training-data/test1234
+duple-api/profile-data/*/
