@@ -19,10 +19,11 @@ class MessageType(Enum):
     """
 
     NEW = 1
-    SAMPLE = 2
-    LABEL = 3
-    TRAIN = 4
-    DEDUPE = 5
+    MODEL = 2
+    SAMPLE = 3
+    LABEL = 4
+    TRAIN = 5
+    DEDUPE = 6
 
 
 @attr.s

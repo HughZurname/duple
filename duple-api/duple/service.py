@@ -16,34 +16,43 @@ routes = web.RouteTableDef()
 app = web.Application()
 
 
-def route_cors(host, app):
-    logger.info("Configuring cors")
-    cors = aiohttp_cors.setup(
-        app,
-        defaults={
-            host: aiohttp_cors.ResourceOptions(
-                allow_credentials=True, expose_headers="*", allow_headers="*"
-            )
-        },
-    )
-    [cors.add(route) for route in list(app.router.routes())]
-
-
-@routes.get("/health")
-async def health_get(request):
-    """Health check endpoint.
+@routes.post("/existing")
+async def existing(request):
+    """File upload endpoint.
 
     ---
-    description: This end-point allow to test that service is up.
+    description: Recieves data for training and clasification.
     tags:
-    - Health check
+    - Upload
     produces:
     - application/json
     responses:
         "200":
-            description: successful operation. Return status json
+            description: successful operation. Return confirmation response.
     """
-    return web.json_response({"status": "UP"})
+    client_id = request.headers.get("clientId")
+    logger.debug("Recieving data for classification")
+    reader = await request.multipart()
+    field = await reader.next()
+    assert field.name == "duple_data"
+    assert field.headers["Content-Type"] == "text/csv" or "application/vnd.ms-excel"
+    filepath = os.path.join("profile-data/", client_id, field.filename)
+    size = 0
+
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    with open(filepath, "wb") as f:
+        while True:
+            chunk = await field.read_chunk()
+            if not chunk:
+                break
+            size += len(chunk)
+            f.write(chunk)
+
+    message = messaage_wrapper(
+        client_id, {"use_model": True, "filepath": filepath}
+    )
+    await app["message_queue"].put(message)
+    return web.json_response({"recieved": field.filename, "size": size})
 
 
 @routes.post("/upload")
@@ -77,7 +86,7 @@ async def upload(request):
                 break
             size += len(chunk)
             f.write(chunk)
-    app[client_id] = {'attempts': 1}
+    app[client_id] = {"attempts": 1}
     message = messaage_wrapper(client_id, {"filepath": filepath})
     await app["message_queue"].put(message)
     return web.json_response({"recieved": field.filename, "size": size})
@@ -164,6 +173,18 @@ async def training_post(request):
 
 @routes.get("/results")
 async def results(request):
+    """Results endpoint for retrieving classified data.
+
+    ---
+    description: Supplies clustered data containing duplicates found with the duple model.
+    tags:
+    - Results
+    produces:
+    - application/json
+    responses:
+        "200":
+            description: successful operation. Return labeled results.
+    """
     client_id = request.headers.get("clientId")
     datastore = get_datastore(client_id)
     if datastore.has_result:
@@ -190,8 +211,20 @@ async def results(request):
 
 @routes.get("/results/file")
 async def results_file(request):
-    params = request.rel_url.query  #request.headers.get("clientId")
-    datastore = get_datastore(params.get('clientId'))
+    """Results endpoint for retrieving classified data results file.
+
+    ---
+    description: Supplies a file containing duplicates found with the duple model.
+    tags:
+    - Results
+    produces:
+    - text/csv
+    responses:
+        "200":
+            description: successful operation. Return labeled results file.
+    """
+    params = request.rel_url.query
+    datastore = get_datastore(params.get("clientId"))
     if datastore.has_result:
         result = datastore.result
         result = result[result.cluster_id > 0].to_csv(mode="wb", index=False)
@@ -210,6 +243,18 @@ async def results_file(request):
 
 @routes.get("/stats")
 async def stats(request):
+    """Stats endpoint for retrieving classification statistics.
+
+    ---
+    description: Supplies information reagarding the number of records processed and duplicates found.
+    tags:
+    - Results
+    produces:
+    - application/json
+    responses:
+        "200":
+            description: successful operation. Return duple statistics.
+    """
     client_id = request.headers.get("clientId")
     datastore = get_datastore(client_id)
     if datastore.has_result:
@@ -220,6 +265,18 @@ async def stats(request):
 
 @routes.get("/reset")
 async def reset(request):
+    """Reset endpoint.
+
+    ---
+    description: Resets the state of the application and deletes stored data.
+    tags:
+    - Results
+    produces:
+    - application/json
+    responses:
+        "200":
+            description: successful operation. Reset duple application data.
+    """
     client_id = request.headers.get("clientId")
     delete_datastore(client_id)
     if app.get(client_id):
@@ -255,6 +312,19 @@ async def on_shutdown(app, signal=None):
 
     await asyncio.gather(*tasks, return_exceptions=True)
     logger.info(f"Stopping")
+
+
+def route_cors(host, app):
+    logger.info("Configuring cors")
+    cors = aiohttp_cors.setup(
+        app,
+        defaults={
+            host: aiohttp_cors.ResourceOptions(
+                allow_credentials=True, expose_headers="*", allow_headers="*"
+            )
+        },
+    )
+    [cors.add(route) for route in list(app.router.routes())]
 
 
 def init():

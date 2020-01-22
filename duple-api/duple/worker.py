@@ -15,8 +15,11 @@ async def producer(queue, message):
         message.client_id,
         message.message_id,
     )
-    if message.message_type == MessageType.NEW and message.data:
-        if message.data.get("filepath"):
+    if message.message_type == MessageType.NEW and message.client_id:
+        if message.data.get("use_model"):
+            message.message_type = MessageType.MODEL
+            asyncio.create_task(queue.put(message))
+        elif message.data.get("filepath"):
             message.message_type = MessageType.SAMPLE
             asyncio.create_task(queue.put(message))
         elif message.data.get("labeled_pairs"):
@@ -35,7 +38,7 @@ async def producer(queue, message):
                 message.data,
             )
     else:
-        logger.error("Unable to schedule message %s", message)
+        logger.error("Unable to schedule message %s invalid data", message)
 
 
 async def consumer(queue):
@@ -52,6 +55,10 @@ async def consumer(queue):
             message.client_id,
             message.message_id,
         )
+        if message.message_type == MessageType.MODEL:
+            await datastore.model(message.data.get("filepath"), message.client_id)
+            await datastore.dedupe()
+            queue.task_done()
         if message.message_type == MessageType.SAMPLE:
             await datastore.sample(message.data.get("filepath"))
             queue.task_done()

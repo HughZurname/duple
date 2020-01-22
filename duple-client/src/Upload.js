@@ -75,13 +75,11 @@ const FileDropzone = props => {
     )
 }
 
-const UploadForm = props => {
+const BaseForm = props => {
     const formData = new FormData()
-    const postData = useDupleFetch({
-        url: '/upload',
-        method: 'POST',
-    })
+    const postData = useDupleFetch(props.postSettings)
     const [files, setFiles] = React.useState([])
+
     const [uploadSuccess, setUploadSuccess] = useSessionStorage(
         'uploadSuccess',
         false
@@ -106,11 +104,7 @@ const UploadForm = props => {
                         background='light-1'
                         align='center'
                         justify='center'>
-                        <Text>
-                            Classification data successfully uploaded. Your data
-                            is being processed and will be redirected to the
-                            training page to begin training.
-                        </Text>
+                        <Text>{props.progressText}</Text>
                         <Box
                             direction='row'
                             gap='small'
@@ -129,7 +123,7 @@ const UploadForm = props => {
                                     )
                                 }}
                             />
-                            <RoutedButton primary to='/training' label='Okay' />
+                            {props.progressButton}
                         </Box>
                     </Box>
                 </Layer>
@@ -151,6 +145,39 @@ const UploadForm = props => {
             </Box>
         </Grommet>
     )
+}
+
+const UploadForm = props => {
+    const [modelType] = useSessionStorage('modelType')
+    if (modelType === 'trained')
+        return (
+            <BaseForm
+                postSettings={{
+                    url: '/existing',
+                    method: 'POST',
+                }}
+                progressButton={
+                    <RoutedButton primary to='/results' label='Okay' />
+                }
+                progressText='Classification data successfully uploaded. Your data
+                            is being scanned for duplicates. You will be redirected to the results page.'
+            />
+        )
+    else
+        return (
+            <BaseForm
+                postSettings={{
+                    url: '/upload',
+                    method: 'POST',
+                }}
+                progressButton={
+                    <RoutedButton primary to='/training' label='Okay' />
+                }
+                progressText='Classification data successfully uploaded. Your data
+                            is being processed and will be redirected to the
+                            training page to begin training.'
+            />
+        )
 }
 
 export default UploadForm

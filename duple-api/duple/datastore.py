@@ -16,8 +16,21 @@ class DataStore(Deduplicate):
     training_complete: bool = False
     dedupe_complete: bool = False
 
+    async def model(self, filepath, client_id):
+        self.data_frame = pd.read_csv(filepath)
+        self.original_data = self.data_frame
+
+        # FIXME: Hack for Date fields
+        self.data_frame["date_of_birth"] = pd.to_datetime(
+            self.data_frame["date_of_birth"], errors="coerce", format="%d/%m/%Y"
+        )
+
+        self.stats.update({"records": self.data_frame.shape[0]})
+        self.deduper = self.dedupe_static(client_id)
+
     async def sample(self, filepath):
         self.data_frame = pd.read_csv(filepath)
+        self.original_data = self.data_frame
         self.stats.update({"records": self.data_frame.shape[0]})
 
         # FIXME: Hack for Date fields, needs some mechanism for specifying types.
@@ -45,8 +58,7 @@ class DataStore(Deduplicate):
 
     async def dedupe(self):
         self.updating = True
-        logger.warning("TODO: Use original df here?")
-        self.result, duplicates = self.dedupe_deduplicate(self.deduper, self.data_frame)
+        self.result, duplicates = self.dedupe_deduplicate(self.deduper, self.original_data)
         self.stats.update({"duplicates": duplicates})
         self.dedupe_complete = True
         self.has_result = True
@@ -78,9 +90,8 @@ def get_datastore(client_id):
 def delete_datastore(client_id):
     try:
         del datastores[client_id]
-    except KeyError as ex:
+    except KeyError:
         logger.error(
             "Failed to remove datastore for client_id %s, datastore not found",
             client_id,
         )
-        logger.error("Exception: %s", ex)
