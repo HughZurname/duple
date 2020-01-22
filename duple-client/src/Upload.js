@@ -159,7 +159,7 @@ const UploadForm = props => {
                 progressButton={
                     <RoutedButton primary to='/results' label='Okay' />
                 }
-                progressText='Classification data successfully uploaded. Your data
+                progressText='Deduplication data file successfully uploaded, please wait while your data
                             is being scanned for duplicates. You will be redirected to the results page.'
             />
         )

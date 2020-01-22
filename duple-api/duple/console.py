@@ -20,7 +20,7 @@ def data_prep(df):
 def data_cluster(deduper, data_dict, threshold):
     logger.debug("Clustering data")
     duplicates = deduper.match(data_dict, threshold)
-    logger.debug("Duplicate records found: %d", len(duplicates))
+    logger.info("Duplicate records found: %d", len(duplicates))
 
     df_data = [
         {"id": record_id, "cluster_id": cluster_id, "confidence": score}
@@ -34,7 +34,7 @@ def data_cluster(deduper, data_dict, threshold):
     return clustered_df
 
 
-def console_deduplicate(
+def deduplicate(
     df,
     recall_weight=1,
     sample_size=0.3,
@@ -79,3 +79,11 @@ def console_deduplicate(
     results.drop(["dictionary"], axis=1, inplace=True)
 
     return results
+
+
+def console_deduplicate(filename):
+    logger.info("Starting console deduplicator")
+    df = pd.read_csv(filename)
+    result = deduplicate(df)
+    logger.info("Writing results file to relateddata.csv")
+    result.to_csv("relateddata.csv", index=False)

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Grommet, Box, RadioButtonGroup, Button } from 'grommet'
+import { Grommet, Box, RadioButtonGroup, Button, Text } from 'grommet'
 import { grommet } from 'grommet/themes'
 
 import useSessionStorage from './useSessionStorage'
@@ -14,12 +14,23 @@ const Start = props => {
     const [modelType, setModelType] = useSessionStorage('modelType')
     return (
         <Grommet theme={grommet}>
+            <Box direction='column' align='start' gap='small'>
+                <Text size='large'>
+                    Welcome! To get started please select a a method below.
+                    Select `Use a pre-trained model` and click 'Start' to have
+                    your upload data scanned for duplicates immediately.
+                </Text>
+                <Text size='large'>
+                    Alternatively, select 'Train a new model' to begin the
+                    training phase and create your own classifier.
+                </Text>
+            </Box>
             <Box direction='row' justify='between' pad='medium'>
                 <RadioButtonGroup
                     name='radio'
                     options={[
-                        { label: 'Use pre-trained model', value: 'trained' },
-                        { label: 'Train new model', value: 'new' },
+                        { label: 'Use a pre-trained model', value: 'trained' },
+                        { label: 'Train a new model', value: 'new' },
                     ]}
                     value={modelType}
                     onChange={event => setModelType(event.target.value)}

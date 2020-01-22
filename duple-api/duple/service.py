@@ -287,11 +287,8 @@ async def reset(request):
 async def message_push(queue):
     while True:
         await asyncio.sleep(1)
-        try:
-            message = await app["message_queue"].get()
-            asyncio.create_task(worker.producer(queue, message))
-        except Exception as e:
-            logger.error(f"Failed to queue message with error: {e}")
+        message = await app["message_queue"].get()
+        asyncio.create_task(worker.producer(queue, message))
 
 
 async def on_startup(app):
