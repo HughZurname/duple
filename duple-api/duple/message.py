@@ -34,5 +34,5 @@ class Message:
     data = attr.ib()
 
 
-def messaage_wrapper(client_id, data, message_state=None):
+def message_wrapper(client_id, data, message_state=None):
     return Message(client_id, uuid.uuid4(), message_state or MessageType.NEW, data)

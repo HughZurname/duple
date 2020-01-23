@@ -1,5 +1,5 @@
 from duple import logger
-from duple.message import messaage_wrapper
+from duple.message import message_wrapper
 from duple.datastore import get_datastore, delete_datastore
 import duple.worker as worker
 
@@ -68,7 +68,7 @@ async def existing(request):
             size += len(chunk)
             f.write(chunk)
 
-    message = messaage_wrapper(client_id, {"use_model": True, "filepath": filepath})
+    message = message_wrapper(client_id, {"use_model": True, "filepath": filepath})
     await app["message_queue"].put(message)
     app[client_id]["attempts"] = 4
     return web.json_response({"recieved": field.filename, "size": size})
@@ -106,7 +106,7 @@ async def upload(request):
             size += len(chunk)
             f.write(chunk)
 
-    message = messaage_wrapper(client_id, {"filepath": filepath})
+    message = message_wrapper(client_id, {"filepath": filepath})
     await app["message_queue"].put(message)
     return web.json_response({"recieved": field.filename, "size": size})
 
@@ -180,11 +180,11 @@ async def training_post(request):
         if app[client_id]["attempts"] < 4:
             logger.info("Updating traing pairs for labeling")
             labeled_pairs = await request.json()
-            message = messaage_wrapper(client_id, {"labeled_pairs": labeled_pairs})
+            message = message_wrapper(client_id, {"labeled_pairs": labeled_pairs})
             await app["message_queue"].put(message)
             app[client_id]["attempts"] += 1
         else:
-            message = messaage_wrapper(client_id, {"labeling_complete": True})
+            message = message_wrapper(client_id, {"labeling_complete": True})
             await app["message_queue"].put(message)
         return web.Response(status=201)
 
@@ -217,7 +217,7 @@ async def results(request):
         return web.Response(body=result, content_type="application/json")
     else:
         if await datastore.get_status("training"):
-            message = messaage_wrapper(client_id, {"training_complete": True})
+            message = message_wrapper(client_id, {"training_complete": True})
             await app["message_queue"].put(message)
         if await datastore.get_status("dedupe"):
             result = datastore.result

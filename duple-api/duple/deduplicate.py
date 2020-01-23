@@ -1,5 +1,5 @@
 from duple import logger
-from duple.data_utils import select_fields, data_prep, data_cluster
+from duple.datautils import select_fields, data_prep, data_cluster
 
 import math
 import os
