@@ -1,0 +1,10 @@
+version: "3.7"
+services:
+  duple-client:
+    build: ./duple-client
+    ports:
+      - "80:80"
+  duple-api:
+    build: ./duple-api
+    ports:
+      - "8080:8080"

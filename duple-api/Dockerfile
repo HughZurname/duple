@@ -6,8 +6,4 @@ COPY . .
 
 RUN pip install .
 
-RUN useradd --create-home appuser
-WORKDIR /home/appuser
-USER appuser
-
-CMD [ "python", "-m", "duple" ]
+CMD [ "python", "-m", "duple", "-s" ]
