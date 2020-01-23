@@ -15,6 +15,7 @@ setuptools.setup(
         "aiohttp[speedups]",
         "aiohttp-swagger[performance]",
         "aiohttp-cors",
+        "shortuuid"
     ],
     packages=setuptools.find_packages(),
     include_package_data=True,

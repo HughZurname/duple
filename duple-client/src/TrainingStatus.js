@@ -29,7 +29,7 @@ const TrainingStatus = props => {
                     </Text>
                     <Text
                         style={{ width: '8em', textAlign: 'center' }}
-                        size='large'>{`${attempts}/3 attempts`}</Text>
+                        size='large'>{`${attempts}/${props.totalAttempts} rounds`}</Text>
                     <Box
                         direction='row'
                         gap='small'

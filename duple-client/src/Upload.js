@@ -84,6 +84,7 @@ const BaseForm = props => {
         'uploadSuccess',
         false
     )
+    const [, setTrainingComplete] = useSessionStorage('trainingComplete')
 
     const handleSubmit = event => {
         event.preventDefault()
@@ -92,6 +93,7 @@ const BaseForm = props => {
         })
         postData.doFetch({ body: formData }).then(response => {
             if (response.ok) setUploadSuccess(true)
+            if (props.trained) setTrainingComplete(true)
         })
     }
 
@@ -138,7 +140,12 @@ const BaseForm = props => {
                             justify='center'
                             gap='small'
                             margin={{ top: 'medium' }}>
-                            <Button type='submit' label='Upload' primary />
+                            <Button
+                                type='submit'
+                                label='Upload'
+                                primary
+                                disabled={files.length === 0}
+                            />
                         </Box>
                     </form>
                 </Box>
@@ -152,6 +159,8 @@ const UploadForm = props => {
     if (modelType === 'trained')
         return (
             <BaseForm
+                trained={true}
+                clientId={props.clientId}
                 postSettings={{
                     url: '/existing',
                     method: 'POST',
@@ -166,6 +175,7 @@ const UploadForm = props => {
     else
         return (
             <BaseForm
+                clientId={props.clientId}
                 postSettings={{
                     url: '/upload',
                     method: 'POST',

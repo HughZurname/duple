@@ -17,7 +17,7 @@ const Start = props => {
             <Box direction='column' align='start' gap='small'>
                 <Text size='large'>
                     Welcome! To get started please select a a method below.
-                    Select `Use a pre-trained model` and click 'Start' to have
+                    Select 'Use a pre-trained model' and click 'Start' to have
                     your upload data scanned for duplicates immediately.
                 </Text>
                 <Text size='large'>

@@ -11,9 +11,29 @@ import aiohttp_cors
 
 import os
 import asyncio
+import shortuuid
 
 routes = web.RouteTableDef()
 app = web.Application()
+
+
+@routes.get("/register")
+async def register(request):
+    """Registers a new client with duple.
+
+    ---
+    description: Supplies a unique client identifier.
+    tags:
+    - Results
+    produces:
+    - application/json
+    responses:
+        "200":
+            description: successful operation. Return client id.
+    """
+    client_id = shortuuid.uuid(request.headers.get('token'))
+    app[client_id] = {"attempts": 1}
+    return web.json_response({"clientId": client_id})
 
 
 @routes.post("/existing")
@@ -48,10 +68,9 @@ async def existing(request):
             size += len(chunk)
             f.write(chunk)
 
-    message = messaage_wrapper(
-        client_id, {"use_model": True, "filepath": filepath}
-    )
+    message = messaage_wrapper(client_id, {"use_model": True, "filepath": filepath})
     await app["message_queue"].put(message)
+    app[client_id]["attempts"] = 4
     return web.json_response({"recieved": field.filename, "size": size})
 
 
@@ -86,7 +105,7 @@ async def upload(request):
                 break
             size += len(chunk)
             f.write(chunk)
-    app[client_id] = {"attempts": 1}
+
     message = messaage_wrapper(client_id, {"filepath": filepath})
     await app["message_queue"].put(message)
     return web.json_response({"recieved": field.filename, "size": size})
@@ -109,7 +128,7 @@ async def training_get(request):
     logger.debug("Training data request recieved")
     client_id = request.headers.get("clientId")
     datastore = get_datastore(client_id)
-    if app[client_id]["attempts"] <= 3:
+    if app[client_id]["attempts"] <= 4:
         training_data = await datastore.get_pairs()
         return web.json_response(training_data)
     else:
@@ -153,11 +172,12 @@ async def training_post(request):
               items:
                 - $ref: '#/definitions/Person'
                 - $ref: '#/definitions/Person'
+
     """
     if request.body_exists and request.can_read_body:
         logger.debug("Labelled training data recieved.")
         client_id = request.headers.get("clientId")
-        if app[client_id]["attempts"] < 3:
+        if app[client_id]["attempts"] < 4:
             logger.info("Updating traing pairs for labeling")
             labeled_pairs = await request.json()
             message = messaage_wrapper(client_id, {"labeled_pairs": labeled_pairs})
@@ -231,8 +251,7 @@ async def results_file(request):
         return web.Response(
             headers=MultiDict(
                 {
-                    "Content-Disposition": 'attachment; filename="relateddata.csv"',
-                    "Content-Type": "text/csv",
+                    "Content-Disposition": 'attachment; filename="relateddata.csv"'
                 }
             ),
             body=result,

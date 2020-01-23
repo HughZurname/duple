@@ -54,6 +54,7 @@ const Training = props => {
                 positiveIds={positiveIds}
                 negativeIds={negativeIds}
                 attempts={attempts}
+                totalAttempts={props.totalAttempts}
                 handleClear={() => {
                     setPositiveIds([])
                     setNegativeIds([])
@@ -69,7 +70,7 @@ const Training = props => {
                         })
                         .then(response => {
                             if (response.ok) {
-                                if (attempts < 3) {
+                                if (attempts < props.totalAttempts) {
                                     setAttempts(attempts + 1)
                                     setPositiveIds([])
                                     setNegativeIds([])

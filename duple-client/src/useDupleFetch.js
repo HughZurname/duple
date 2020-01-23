@@ -8,7 +8,12 @@ const useDupleFetch = ({ url, init = {}, ...rest }) => {
     finalHeaders['clientId'] = clientId
     init.headers = finalHeaders
 
-    return useFetch({ url: finalUrl, init, ...rest })
+    return useFetch({
+        url: finalUrl,
+        init,
+        cachePolicy: 'exact-cache-and-network',
+        ...rest,
+    })
 }
 
 export default useDupleFetch

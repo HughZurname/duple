@@ -3,7 +3,7 @@ services:
   duple-client:
     build: ./duple-client
     ports:
-      - "80:80"
+      - "5000:5000"
   duple-api:
     build: ./duple-api
     ports:

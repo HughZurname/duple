@@ -7,12 +7,22 @@ import { FetchProvider } from '@bjornagh/use-fetch'
 import uniqid from 'uniqid'
 
 const cache = new Map()
+const clientId = window.localStorage.getItem('clientId')
 
-window.localStorage.setItem('clientId', uniqid())
+const authenticate = clientId => {
+    if (clientId == null)
+        fetch('http://localhost:8080/register', {
+            headers: { token: uniqid() },
+        })
+            .then(response => response.ok && response.json())
+            .then(data =>
+                window.localStorage.setItem('clientId', data.clientId)
+            )
+}
 
 ReactDOM.render(
     <FetchProvider cache={cache}>
-        <App />
+        <App clientId={clientId} />
     </FetchProvider>,
     document.getElementById('root')
 )
@@ -21,3 +31,4 @@ ReactDOM.render(
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: https://bit.ly/CRA-PWA
 serviceWorker.register()
+authenticate(clientId)

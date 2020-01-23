@@ -10,7 +10,7 @@ async def producer(queue, message):
     [description]
     """
     logger.info(
-        "Scheduling %s work item for client %s message (%s)",
+        "Scheduling [%s] work item for client [%s] message [%s]",
         message.message_type.name,
         message.client_id,
         message.message_id,
@@ -50,7 +50,7 @@ async def consumer(queue):
         message = await queue.get()
         datastore = get_datastore(message.client_id)
         logger.info(
-            "Processing %s work item for client %s message (%s)",
+            "Processing [%s] work item for client_id [%s] message_id [%s]",
             message.message_type.name,
             message.client_id,
             message.message_id,

@@ -18,7 +18,7 @@ import Upload from './Upload'
 import Training from './Training'
 import Results from './Results'
 
-function App() {
+const App = props => {
     const [openNotification, setOpenNotification] = React.useState()
     const notificationRef = React.useRef(null)
 
@@ -72,10 +72,10 @@ function App() {
                 <Main pad='small'>
                     <Switch>
                         <Route path='/training'>
-                            <Training />
+                            <Training totalAttempts={4} />
                         </Route>
                         <Route path='/upload'>
-                            <Upload />
+                            <Upload clientId={props.clientId} />
                         </Route>
                         <Route path='/results'>
                             <Results />

@@ -5,8 +5,10 @@ import { grommet } from 'grommet/themes'
 import Loader from 'react-loader-spinner'
 
 import useDupleFetch from './useDupleFetch'
+import RoutedButton from './RoutedButton'
 
 const Results = props => {
+    const [downloaded, setDownloaded] = React.useState(false)
     const results = useDupleFetch({
         url: '/results',
     })
@@ -35,15 +37,24 @@ const Results = props => {
                         size='large'>
                         Results
                     </Text>
-                    <Button
-                        disabled={results.fetching}
-                        gap='medium'
-                        primary
-                        label='Download'
-                        href={`http://localhost:8080/results/file?clientId=${window.localStorage.getItem(
-                            'clientId'
-                        )}`}
-                    />
+                    <Box direction='row' gap='medium'>
+                        <Button
+                            primary
+                            disabled={results.fetching}
+                            gap='medium'
+                            label='Download'
+                            href={`http://localhost:8080/results/file?clientId=${window.localStorage.getItem(
+                                'clientId'
+                            )}`}
+                            onClick={() => setDownloaded(true)}
+                        />
+                        <RoutedButton
+                            to='/'
+                            disabled={!downloaded}
+                            color='accent-1'
+                            label='Finished'
+                        />
+                    </Box>
                 </Box>
                 {stats.fetching && <Text>Loading...</Text>}
                 {!stats.fetching && stats.data && (

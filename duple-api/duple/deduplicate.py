@@ -26,7 +26,7 @@ class Deduplicate:
         fields = select_fields(fields)
         return dedupe.Dedupe(fields)
 
-    def dedupe_pairs(self, deduper, pairs=10):
+    def dedupe_pairs(self, deduper, pairs=6):
         logger.debug("Retrieving pairs for active labeling")
 
         return [
