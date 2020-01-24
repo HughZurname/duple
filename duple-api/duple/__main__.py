@@ -4,7 +4,7 @@ from optparse import OptionParser
 
 
 def parse_options():
-    parser = OptionParser(usage="stressjr [options]")
+    parser = OptionParser(usage="duple [options]")
 
     parser.add_option(
         "-s",

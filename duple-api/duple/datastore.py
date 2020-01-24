@@ -18,7 +18,6 @@ class DataStore(Deduplicate):
 
     async def model(self, filepath, client_id):
         self.data_frame = pd.read_csv(filepath)
-        self.original_data = self.data_frame
 
         # FIXME: Hack for Date fields
         self.data_frame["date_of_birth"] = pd.to_datetime(
@@ -30,7 +29,6 @@ class DataStore(Deduplicate):
 
     async def sample(self, filepath):
         self.data_frame = pd.read_csv(filepath)
-        self.original_data = self.data_frame
         self.stats.update({"records": self.data_frame.shape[0]})
 
         # FIXME: Hack for Date fields, needs some mechanism for specifying types.
@@ -58,7 +56,7 @@ class DataStore(Deduplicate):
 
     async def dedupe(self):
         self.updating = True
-        self.result, duplicates = self.dedupe_deduplicate(self.deduper, self.original_data)
+        self.result, duplicates = self.dedupe_deduplicate(self.deduper, self.data_frame)
         self.stats.update({"duplicates": duplicates})
         self.dedupe_complete = True
         self.has_result = True

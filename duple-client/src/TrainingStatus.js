@@ -45,7 +45,7 @@ const TrainingStatus = props => {
                         <Button
                             disabled={props.fetching}
                             primary
-                            label='Submit'
+                            label='Continue'
                             onClick={() => props.handleSubmit()}
                         />
                     </Box>

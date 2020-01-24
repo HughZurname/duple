@@ -1,5 +1,5 @@
 from duple import logger
-from duple.data_utils import clean_df, select_fields
+from duple.datautils import clean_df, select_fields
 
 import pandas as pd
 

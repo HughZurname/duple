@@ -8,20 +8,6 @@ pytestmark = pytest.mark.asyncio
 
 
 @pytest.fixture
-def mock_queue(mocker, monkeypatch):
-    queue = mocker.Mock()
-    monkeypatch.setattr(worker.asyncio, "Queue", queue)
-    return queue.return_value
-
-
-@pytest.fixture
-def mock_get(mock_queue, create_mock_coro):
-    mock_get, coro_get = create_mock_coro()
-    mock_queue.get = coro_get
-    return mock_get
-
-
-@pytest.fixture
 def model_message():
     return message_wrapper("123abc", {"use_model": True})
 

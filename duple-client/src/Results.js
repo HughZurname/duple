@@ -60,11 +60,14 @@ const Results = props => {
                 {!stats.fetching && stats.data && (
                     <Box direction='column' align='center' gap='small'>
                         <Text
+                            weight='bold'
                             style={{ width: '8em', textAlign: 'end' }}
                             size='medium'>
                             {stats.data.duplicates}
                         </Text>
-                        <Text style={{ width: '8em', textAlign: 'end' }}>
+                        <Text
+                            weight='bold'
+                            style={{ width: '8em', textAlign: 'end' }}>
                             duplicates found
                         </Text>
                     </Box>
@@ -83,13 +86,13 @@ const Results = props => {
                     size='full'
                     style={{ width: '100%' }}
                     sortable={true}
+                    primaryKey={`${results.data.data.index}`}
                     columns={[
-                        { property: 'index', header: 'Index' },
+                        { property: 'cluster_id', header: 'Cluster' },
                         { property: 'given_name', header: 'Given Name' },
                         { property: 'surname', header: 'Surname' },
                         { property: 'date_of_birth', header: 'Date of Birth' },
                         { property: 'sex', header: 'Sex' },
-                        { property: 'cluster_id', header: 'Cluster' },
                         {
                             property: 'confidence',
                             header: 'Confidence',
