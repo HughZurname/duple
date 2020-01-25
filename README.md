@@ -28,6 +28,10 @@ Because this seemed like a fun project, I decided to take things a little furthe
 
 The instructions for running each of the projects can be found in the `README.md` in the root of thier subdirectories. Alternatively a docker-compose.yaml has been supplied and can be run with `docker-compose -f "docker-compose.yaml" up -d --build` the client can be accessed via `localhost:5000` and the api on `localhost:8080`
 
+## Testing
+
+As the project contains components implemented in different languages the testing methods are specific to those and will therefore contain instrucions in thier respective sub directories.
+
 ## Structure
 
 This project is broken in to two main sections:
@@ -43,7 +47,5 @@ _Both projects have a relatively flat structure which hopefully makes navigating
 ## Concepts
 
 ## Rationale
-
-## Testing
 
 ## Known/Potential Issues
