@@ -12,11 +12,12 @@ import {
 } from 'grommet-icons'
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css'
 
-import RoutedAnchor from './RoutedAnchor'
-import Start from './Start'
-import Upload from './Upload'
-import Training from './Training'
-import Results from './Results'
+import { RoutedAnchor } from '../common'
+
+import { Start } from '../start'
+import { Upload } from '../upload'
+import { Training } from '../training'
+import { Results } from '../results'
 
 const App = props => {
     const [openNotification, setOpenNotification] = React.useState()

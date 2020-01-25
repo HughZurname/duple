@@ -31,8 +31,7 @@ async def register(request):
         "200":
             description: successful operation. Return client id.
     """
-    client_id = shortuuid.uuid(request.headers.get('token'))
-    app[client_id] = {"attempts": 1}
+    client_id = shortuuid.uuid(request.headers.get("token"))
     return web.json_response({"clientId": client_id})
 
 
@@ -70,7 +69,7 @@ async def existing(request):
 
     message = message_wrapper(client_id, {"use_model": True, "filepath": filepath})
     await app["message_queue"].put(message)
-    app[client_id]["attempts"] = 4
+
     return web.json_response({"recieved": field.filename, "size": size})
 
 
@@ -128,7 +127,8 @@ async def training_get(request):
     logger.debug("Training data request recieved")
     client_id = request.headers.get("clientId")
     datastore = get_datastore(client_id)
-    if app[client_id]["attempts"] <= 4:
+
+    if datastore.training_rounds <= 4:
         training_data = await datastore.get_pairs()
         return web.json_response(training_data)
     else:
@@ -177,12 +177,13 @@ async def training_post(request):
     if request.body_exists and request.can_read_body:
         logger.debug("Labelled training data recieved.")
         client_id = request.headers.get("clientId")
-        if app[client_id]["attempts"] < 4:
+        datastore = get_datastore(client_id)
+
+        if datastore.training_rounds < 4:
             logger.info("Updating traing pairs for labeling")
             labeled_pairs = await request.json()
             message = message_wrapper(client_id, {"labeled_pairs": labeled_pairs})
             await app["message_queue"].put(message)
-            app[client_id]["attempts"] += 1
         else:
             message = message_wrapper(client_id, {"labeling_complete": True})
             await app["message_queue"].put(message)
@@ -207,6 +208,7 @@ async def results(request):
     """
     client_id = request.headers.get("clientId")
     datastore = get_datastore(client_id)
+
     if datastore.has_result:
         result = datastore.result
         result = (
@@ -250,9 +252,7 @@ async def results_file(request):
         result = result[result.cluster_id > 0].to_csv(mode="wb", index=False)
         return web.Response(
             headers=MultiDict(
-                {
-                    "Content-Disposition": 'attachment; filename="relateddata.csv"'
-                }
+                {"Content-Disposition": 'attachment; filename="relateddata.csv"'}
             ),
             body=result,
         )
@@ -298,8 +298,7 @@ async def reset(request):
     """
     client_id = request.headers.get("clientId")
     delete_datastore(client_id)
-    if app.get(client_id):
-        app[client_id]["attempts"] = 0
+
     return web.json_response({"reset": "OK"})
 
 
@@ -311,10 +310,10 @@ async def message_push(queue):
 
 
 async def on_startup(app):
-    app["worker_queue"] = asyncio.Queue()
     app["message_queue"] = asyncio.Queue()
-    asyncio.create_task(message_push(app["worker_queue"]))
-    asyncio.create_task(worker.consumer(app["worker_queue"]))
+    worker_queue = asyncio.Queue()
+    asyncio.create_task(message_push(worker_queue))
+    asyncio.create_task(worker.consumer(worker_queue))
 
 
 async def on_shutdown(app, signal=None):
@@ -343,10 +342,8 @@ def route_cors(host, app):
     [cors.add(route) for route in list(app.router.routes())]
 
 
-def init():
+async def create_app():
     app.add_routes(routes)
-    app.on_startup.append(on_startup)
-    app.on_shutdown.append(on_shutdown)
     route_cors("*", app)
     setup_swagger(
         app,
@@ -366,10 +363,12 @@ def init():
             }
         },
     )
+    app.on_startup.append(on_startup)
+    app.on_shutdown.append(on_shutdown)
     return app
 
 
 def run():
     logger.info("Starting duple.")
-    web.run_app(init())
+    web.run_app(create_app())
     logger.info("Duple successfully shutdown.")

@@ -11,7 +11,7 @@ const useDupleFetch = ({ url, init = {}, ...rest }) => {
     return useFetch({
         url: finalUrl,
         init,
-        cachePolicy: 'exact-cache-and-network',
+        cachePolicy: 'cache-and-network',
         ...rest,
     })
 }

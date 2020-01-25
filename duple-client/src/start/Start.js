@@ -3,8 +3,7 @@ import React from 'react'
 import { Grommet, Box, RadioButtonGroup, Button, Text } from 'grommet'
 import { grommet } from 'grommet/themes'
 
-import useSessionStorage from './useSessionStorage'
-import RoutedButton from './RoutedButton'
+import { useSessionStorage, RoutedButton } from '../common'
 
 const Start = props => {
     const [, setPositiveIds] = useSessionStorage('positiveIds')

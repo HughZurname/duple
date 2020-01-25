@@ -4,9 +4,8 @@ import { Grommet, Box, Layer, Text } from 'grommet'
 import { grommet } from 'grommet/themes'
 import Loader from 'react-loader-spinner'
 
-import useSessionStorage from './useSessionStorage'
-import useDupleFetch from './useDupleFetch'
-import RoutedButton from './RoutedButton'
+import { useSessionStorage, useDupleFetch, RoutedButton } from '../common'
+
 import TrainingTable from './TrainingTable'
 import TrainingStatus from './TrainingStatus'
 

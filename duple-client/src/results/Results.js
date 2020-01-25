@@ -4,8 +4,7 @@ import { Grommet, Box, Meter, DataTable, Button, Text } from 'grommet'
 import { grommet } from 'grommet/themes'
 import Loader from 'react-loader-spinner'
 
-import useDupleFetch from './useDupleFetch'
-import RoutedButton from './RoutedButton'
+import { useDupleFetch, RoutedButton } from '../common'
 
 const Results = props => {
     const [downloaded, setDownloaded] = React.useState(false)
@@ -52,7 +51,7 @@ const Results = props => {
                             to='/'
                             disabled={!downloaded}
                             color='accent-1'
-                            label='Finished'
+                            label='Done'
                         />
                     </Box>
                 </Box>

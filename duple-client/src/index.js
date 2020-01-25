@@ -1,10 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import App from './App'
-import * as serviceWorker from './serviceWorker'
-
 import { FetchProvider } from '@bjornagh/use-fetch'
 import uniqid from 'uniqid'
+
+import { App } from './app'
+import * as serviceWorker from './serviceWorker'
 
 const cache = new Map()
 const clientId = window.localStorage.getItem('clientId')

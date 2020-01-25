@@ -11,6 +11,7 @@ from dataclasses import dataclass
 class DataStore(Deduplicate):
     pairs_buffer: list
     stats: dict
+    training_rounds: int = 1
     updating: bool = False
     has_result: bool = False
     training_complete: bool = False
@@ -46,6 +47,7 @@ class DataStore(Deduplicate):
         self.updating = True
         self.dedupe_mark(self.deduper, labeled_pairs)
         self.pairs_buffer = self.dedupe_pairs(self.deduper)
+        self.training_rounds += 1
         self.updating = False
 
     async def train(self, client_id):
