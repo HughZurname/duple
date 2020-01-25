@@ -4,7 +4,12 @@ import { Grommet, Box, Layer, Text } from 'grommet'
 import { grommet } from 'grommet/themes'
 import Loader from 'react-loader-spinner'
 
-import { useSessionStorage, useDupleFetch, RoutedButton } from '../common'
+import {
+    useSessionStorage,
+    useDupleFetch,
+    fetchReset,
+    RoutedButton,
+} from '../common'
 
 import TrainingTable from './TrainingTable'
 import TrainingStatus from './TrainingStatus'
@@ -102,9 +107,7 @@ const Training = props => {
                                 to='/upload'
                                 onClick={() => {
                                     if (trainingComplete)
-                                        fetch(
-                                            'http://localhost:8080/reset'
-                                        ).then(response => {
+                                        fetchReset().then(response => {
                                             if (response.ok) setAttempts(1)
                                             setTrainingComplete(false)
                                         })

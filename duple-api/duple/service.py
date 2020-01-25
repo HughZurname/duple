@@ -10,6 +10,7 @@ from aiohttp_swagger import setup_swagger
 import aiohttp_cors
 
 import os
+import shutil
 import asyncio
 import shortuuid
 
@@ -297,6 +298,14 @@ async def reset(request):
             description: successful operation. Reset duple application data.
     """
     client_id = request.headers.get("clientId")
+
+    profile_data = os.path.join("profile-data/", client_id)
+    training_data = os.path.join("training_data/", client_id)
+    if os.path.exists(profile_data):
+        shutil.rmtree(profile_data)
+    if os.path.exists(training_data):
+        shutil.rmtree(training_data)
+
     delete_datastore(client_id)
 
     return web.json_response({"reset": "OK"})

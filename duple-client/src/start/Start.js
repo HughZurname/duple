@@ -3,7 +3,7 @@ import React from 'react'
 import { Grommet, Box, RadioButtonGroup, Button, Text } from 'grommet'
 import { grommet } from 'grommet/themes'
 
-import { useSessionStorage, RoutedButton } from '../common'
+import { fetchReset, useSessionStorage, RoutedButton } from '../common'
 
 const Start = props => {
     const [, setPositiveIds] = useSessionStorage('positiveIds')
@@ -45,7 +45,7 @@ const Start = props => {
                 <Button
                     label='Reset'
                     onClick={() =>
-                        fetch('http://localhost:8080/reset').then(response => {
+                        fetchReset().then(response => {
                             if (response.ok) setTrainingComplete(false)
                             setNegativeIds([])
                             setPositiveIds([])

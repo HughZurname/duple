@@ -5,7 +5,12 @@ import { Grommet, Box, Heading, Text, Button, Layer } from 'grommet'
 import { grommet } from 'grommet/themes'
 import styled from 'styled-components'
 
-import { RoutedButton, useSessionStorage, useDupleFetch } from '../common'
+import {
+    RoutedButton,
+    useSessionStorage,
+    useDupleFetch,
+    fetchReset,
+} from '../common'
 
 const getColor = props => {
     if (props.isDragAccept) return '#00e676'
@@ -115,12 +120,9 @@ const BaseForm = props => {
                             <Button
                                 label='New Upload'
                                 onClick={() => {
-                                    fetch('http://localhost:8080/reset').then(
-                                        response => {
-                                            if (response.ok)
-                                                setUploadSuccess(false)
-                                        }
-                                    )
+                                    fetchReset().then(response => {
+                                        if (response.ok) setUploadSuccess(false)
+                                    })
                                 }}
                             />
                             {props.progressButton}
