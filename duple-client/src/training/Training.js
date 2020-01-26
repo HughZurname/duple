@@ -108,8 +108,10 @@ const Training = props => {
                                 onClick={() => {
                                     if (trainingComplete)
                                         fetchReset().then(response => {
-                                            if (response.ok) setAttempts(1)
-                                            setTrainingComplete(false)
+                                            if (response.ok) {
+                                                setAttempts(1)
+                                                setTrainingComplete(false)
+                                            }
                                         })
                                 }}
                             />

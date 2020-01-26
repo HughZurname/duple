@@ -1,10 +1,8 @@
-import asyncio
 import pytest
 
 from duple.message import message_wrapper, MessageType
 import duple.worker as worker
-
-# pytestmark = pytest.mark.asyncio
+# import duple.datastore as datastore
 
 
 @pytest.fixture
@@ -23,24 +21,40 @@ def mock_coro(mocker, monkeypatch):
 
 
 @pytest.fixture
-def queue(mocker, monkeypatch):
-    queue = mocker.Mock()
-    monkeypatch.setattr(worker.asyncio, "Queue", queue)
-    return queue.return_value
+def mock_queue(mocker, monkeypatch):
+    mock_queue = mocker.Mock()
+    monkeypatch.setattr(worker.asyncio, "Queue", mock_queue)
+    return mock_queue.return_value
 
 
 @pytest.fixture
-def queue_get(queue, mock_coro):
+def queue_get(mock_queue, mock_coro):
     mock_get, coro_get = mock_coro()
-    queue.get = coro_get
+    mock_queue.get = coro_get
     return mock_get
 
 
 @pytest.fixture
-def queue_put(queue, mock_coro):
+def queue_put(mock_queue, mock_coro):
     mock_put, coro_put = mock_coro()
-    queue.put = coro_put
+    mock_queue.put = coro_put
     return mock_put
+
+
+# @pytest.fixture
+# def mock_datastore(mocker, monkeypatch):
+#     mock_datastore = mocker.Mock()
+#     mock_deduper = mocker.PropertyMock()
+#     monkeypatch.setattr(datastore, "DataStore", mock_datastore)
+#     monkeypatch.setattr(datastore.DataStore, "deduper", mock_deduper)
+#     return mock_datastore.return_value
+
+
+# @pytest.fixture
+# def datastore_model(mock_datastore, mock_coro):
+#     mock_model, coro_model = mock_coro()
+#     datastore.model = coro_model
+#     return mock_model
 
 
 @pytest.fixture
@@ -70,26 +84,53 @@ def dedupe_message():
     return message_wrapper("123abc", {"training_complete": True})
 
 
-async def test_producer_model(model_message, event_loop, queue, queue_put):
-    await worker.producer(queue, model_message)
+async def test_producer_model(model_message, event_loop, mock_queue, queue_put):
+    await worker.producer(mock_queue, model_message)
     assert model_message.message_type == MessageType.MODEL
 
 
-async def test_producer_sample(sample_message, event_loop, queue, queue_put):
-    await worker.producer(queue, sample_message)
+# async def test_consumer_model(
+#     model_message,
+#     event_loop,
+#     mock_queue,
+#     mock_coro,
+#     queue_put,
+#     queue_get,
+# ):
+#     await worker.producer(mock_queue, model_message)
+#     assert model_message.message_type == MessageType.MODEL
+
+#     queue_get.side_effect = [model_message, Exception()]
+#     datastore_model = mock_coro("duple.datastore.DataStore.model")
+
+#     with pytest.raises(Exception):
+#         await worker.consumer(mock_queue)
+
+#     ret_tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
+
+#     assert 1 == len(ret_tasks)
+#     datastore_model.assert_not_called()
+
+#     await asyncio.gather(*ret_tasks)
+
+#     datastore_model.assert_called_once_with(model_message)
+
+
+async def test_producer_sample(sample_message, event_loop, mock_queue, queue_put):
+    await worker.producer(mock_queue, sample_message)
     assert sample_message.message_type == MessageType.SAMPLE
 
 
-async def test_producer_label(label_message, event_loop, queue, queue_put):
-    await worker.producer(queue, label_message)
+async def test_producer_label(label_message, event_loop, mock_queue, queue_put):
+    await worker.producer(mock_queue, label_message)
     assert label_message.message_type == MessageType.LABEL
 
 
-async def test_producer_train(train_message, event_loop, queue, queue_put):
-    await worker.producer(queue, train_message)
+async def test_producer_train(train_message, event_loop, mock_queue, queue_put):
+    await worker.producer(mock_queue, train_message)
     assert train_message.message_type == MessageType.TRAIN
 
 
-async def test_producer_dedupe(dedupe_message, event_loop, queue, queue_put):
-    await worker.producer(queue, dedupe_message)
+async def test_producer_dedupe(dedupe_message, event_loop, mock_queue, queue_put):
+    await worker.producer(mock_queue, dedupe_message)
     assert dedupe_message.message_type == MessageType.DEDUPE

@@ -1,6 +1,7 @@
 from duple import logger
 from duple.datautils import select_fields, data_prep, data_cluster
 
+import pandas as pd
 import math
 import os
 import dedupe
@@ -70,10 +71,15 @@ class Deduplicate:
             deduper.writeSettings(sf)
 
     def dedupe_deduplicate(self, deduper, df, recall_weight=1):
+        logger.debug("Preparing deduper results")
         df, data_d = data_prep(df)
-        threshold = deduper.threshold(data_d, recall_weight=recall_weight)
-        clustered_df, duplicates = data_cluster(deduper, data_d, threshold)
-        results = df.join(clustered_df, how="left")
-        results.drop(["dictionary"], axis=1, inplace=True)
+        try:
+            threshold = deduper.threshold(data_d, recall_weight=recall_weight)
+            clustered_df, duplicates = data_cluster(deduper, data_d, threshold)
+            results = df.join(clustered_df, how="left")
+            results.drop(["dictionary"], axis=1, inplace=True)
 
-        return results, duplicates
+            return results, duplicates
+        except Exception as e:
+            logger.error("Unable to deduplicate data with the following error: %s", e)
+            return pd.DataFrame(), 0

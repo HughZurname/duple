@@ -210,7 +210,7 @@ async def results(request):
     client_id = request.headers.get("clientId")
     datastore = get_datastore(client_id)
 
-    if datastore.has_result:
+    if datastore.has_result and datastore.result.size > 0:
         result = datastore.result
         result = (
             result[result.cluster_id > 0]
@@ -222,7 +222,7 @@ async def results(request):
         if await datastore.get_status("training"):
             message = message_wrapper(client_id, {"training_complete": True})
             await app["message_queue"].put(message)
-        if await datastore.get_status("dedupe"):
+        if await datastore.get_status("dedupe") and datastore.result.size > 0:
             result = datastore.result
             result = (
                 result[result.cluster_id > 0]
@@ -250,7 +250,11 @@ async def results_file(request):
     datastore = get_datastore(params.get("clientId"))
     if datastore.has_result:
         result = datastore.result
-        result = result[result.cluster_id > 0].to_csv(mode="wb", index=False)
+        result = (
+            result[result.cluster_id > 0]
+            .sort_values("cluster_id")
+            .to_csv(mode="wb", index=False)
+        )
         return web.Response(
             headers=MultiDict(
                 {"Content-Disposition": 'attachment; filename="relateddata.csv"'}

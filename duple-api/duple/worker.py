@@ -1,7 +1,8 @@
 from duple import logger
 import asyncio
+
 from duple.message import MessageType
-from duple.datastore import get_datastore
+import duple.datastore as ds
 
 
 async def producer(queue, message):
@@ -38,7 +39,7 @@ async def producer(queue, message):
                 message.data,
             )
     else:
-        logger.error("Unable to schedule message %s invalid data", message)
+        logger.error("Unable to schedule message %s invalid", message)
 
 
 async def consumer(queue):
@@ -48,7 +49,7 @@ async def consumer(queue):
     """
     while True:
         message = await queue.get()
-        datastore = get_datastore(message.client_id)
+        datastore = ds.get_datastore(message.client_id)
         logger.info(
             "Processing [%s] work item for client_id [%s] message_id [%s]",
             message.message_type.name,

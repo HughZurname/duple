@@ -119,11 +119,7 @@ const BaseForm = props => {
                             }}>
                             <Button
                                 label='New Upload'
-                                onClick={() => {
-                                    fetchReset().then(response => {
-                                        if (response.ok) setUploadSuccess(false)
-                                    })
-                                }}
+                                onClick={() => setUploadSuccess(false)}
                             />
                             {props.progressButton}
                         </Box>
