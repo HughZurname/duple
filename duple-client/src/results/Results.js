@@ -7,7 +7,6 @@ import Loader from 'react-loader-spinner'
 import { useDupleFetch, RoutedButton } from '../common'
 
 const Results = props => {
-    const [downloaded, setDownloaded] = React.useState(false)
     const results = useDupleFetch({
         url: '/results',
     })
@@ -45,14 +44,8 @@ const Results = props => {
                             href={`http://localhost:8080/results/file?clientId=${window.localStorage.getItem(
                                 'clientId'
                             )}`}
-                            onClick={() => setDownloaded(true)}
                         />
-                        <RoutedButton
-                            to='/'
-                            disabled={!downloaded}
-                            color='accent-1'
-                            label='Done'
-                        />
+                        <RoutedButton to='/' color='accent-1' label='Done' />
                     </Box>
                 </Box>
                 {stats.fetching && <Text>Loading...</Text>}
@@ -80,7 +73,7 @@ const Results = props => {
                     </Text>
                 </Box>
             )}
-            {!results.fetching && results.data && (
+            {!results.fetching && Object.keys(results.data).length > 0 && (
                 <DataTable
                     size='full'
                     style={{ width: '100%' }}
@@ -115,6 +108,13 @@ const Results = props => {
                     data={results.data.data}
                     step={50}
                 />
+            )}
+            {!results.fetching && Object.keys(results.data).length <= 0 && (
+                <Box align='center' margin='xlarge' gap='large'>
+                    <Text>
+                        No duplicates found. Please try with another dataset
+                    </Text>
+                </Box>
             )}
         </Grommet>
     )

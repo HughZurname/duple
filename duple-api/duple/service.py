@@ -230,6 +230,8 @@ async def results(request):
                 .to_json(orient="table")
             )
             return web.Response(body=result, content_type="application/json")
+        if datastore.result.size <= 0:
+            return web.json_response({})
 
 
 @routes.get("/results/file")

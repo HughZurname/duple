@@ -53,6 +53,7 @@ const Training = props => {
 
     return (
         <Grommet theme={grommet}>
+            {console.log('Dicks', getTraining.data)}
             <TrainingStatus
                 fetching={getTraining.fetching || postTraining.fetching}
                 positiveIds={positiveIds}
@@ -73,6 +74,7 @@ const Training = props => {
                             ),
                         })
                         .then(response => {
+                            console.log(response)
                             if (response.ok) {
                                 if (attempts < props.totalAttempts) {
                                     setAttempts(attempts + 1)
@@ -137,6 +139,13 @@ const Training = props => {
                         negativeIds: [negativeIds, setNegativeIds],
                     }}
                 />
+            )}
+            {!getTraining.fetching && getTraining.data.length === 0 && (
+                <Box align='center' margin='xlarge' gap='large'>
+                    <Text>
+                        No further training examples found. Please continue...
+                    </Text>
+                </Box>
             )}
         </Grommet>
     )

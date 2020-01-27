@@ -17,6 +17,7 @@ def data_prep(df):
 def data_cluster(deduper, data_dict, threshold):
     logger.debug("Clustering data")
     duplicates = deduper.match(data_dict, threshold)
+    logger.info("Testing deduper duplicates: %s", duplicates)
     logger.debug("Duplicate records found: %d", len(duplicates))
 
     df_data = [
@@ -46,8 +47,9 @@ def select_fields(fields):
 def clean_df(df):
     logger.info("Cleaning dataframe")
     df = df.astype(str)
-    df = df.applymap(lambda x: x.replace(r"[^a-zA-Z0-9/-]", ""))
     df = df.applymap(lambda x: unidecode(x))
     df = df.applymap(lambda x: x.lower())
     df = df.replace({"nan": "", "none": "", "nat": ""})
+    for i in df.columns:
+        df[i] = df[i].str.replace(r"[^a-zA-Z0-9\/-]", "")
     return df

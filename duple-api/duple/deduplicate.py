@@ -30,11 +30,18 @@ class Deduplicate:
     def dedupe_pairs(self, deduper, pairs=6):
         logger.debug("Retrieving pairs for active labeling")
 
-        return [
-            {"pair_id": i, "records": {"record": m1, "match": m2}}
-            for i in range(pairs)
-            for m1, m2 in deduper.uncertainPairs()
-        ]
+        try:
+            training_pairs = [
+                {"pair_id": i, "records": {"record": m1, "match": m2}}
+                for i in range(pairs)
+                for m1, m2 in deduper.uncertainPairs()
+            ]
+            return training_pairs
+        except IndexError as e:
+            logger.error(
+                "Unable to retrieve training pairs with the following error: %s", e
+            )
+            return []
 
     def dedupe_mark(self, deduper, labelled_pairs):
         logger.debug("Marking labelled training pairs")
@@ -44,13 +51,15 @@ class Deduplicate:
         df, data_dict = data_prep(df)
 
         logger.debug("Getting candidate training matches")
-        if len(data_dict) > 5000:
+        if len(data_dict) < 500:
+            sample_num = len(data_dict)
+        elif len(data_dict) > 5000:
             sample_num = math.floor(len(data_dict) * sample_size)
         else:
             logger.debug("Dataset too small, decreasing sample size")
             sample_num = math.floor(len(data_dict) * 0.2)
 
-        logger.debug("Taking data sample of %s records", sample_num)
+        logger.debug("Requsting data sample of %s records", sample_num)
         deduper.sample(data_dict, sample_num)
 
     def dedupe_train(self, deduper, client_id):

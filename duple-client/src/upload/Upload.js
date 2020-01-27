@@ -5,12 +5,7 @@ import { Grommet, Box, Heading, Text, Button, Layer } from 'grommet'
 import { grommet } from 'grommet/themes'
 import styled from 'styled-components'
 
-import {
-    RoutedButton,
-    useSessionStorage,
-    useDupleFetch,
-    fetchReset,
-} from '../common'
+import { RoutedButton, useSessionStorage, useDupleFetch } from '../common'
 
 const getColor = props => {
     if (props.isDragAccept) return '#00e676'

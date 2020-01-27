@@ -1,8 +1,7 @@
 import React from 'react'
 
-import { Grommet, Box, Text, DataTable, CheckBox } from 'grommet'
+import { Grommet, DataTable, CheckBox } from 'grommet'
 import { grommet } from 'grommet/themes'
-import { UserExpert, UserAdd } from 'grommet-icons'
 
 import TrainingPair from './TrainingPair'
 
