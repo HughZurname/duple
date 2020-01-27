@@ -28,6 +28,14 @@ class MessageType(Enum):
 
 @attr.s
 class Message:
+    """Duple message type.
+
+    Variables:
+        client_id -- Unique ID assosicated with requesting client.
+        message_id -- UUID message identifier.
+        message_type -- The message type representing the current processing status.
+        data -- Data relating to the message.
+    """
     client_id = attr.ib()
     message_id = attr.ib(repr=False)
     message_type = attr.ib(validator=attr.validators.in_(MessageType))

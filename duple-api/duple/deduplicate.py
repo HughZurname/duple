@@ -8,7 +8,24 @@ import dedupe
 
 
 class Deduplicate:
+    """Base dedupliction class.
+
+    Provides deduplication functionality using python-dedupe.
+    """
+
     def dedupe_static(self, client_id):
+        """Dedupe for existing data.
+
+        Loads an existing deduper with StaticDedupe. Prioritises model trained
+        by client and falls back to default model.
+
+        Arguments:
+            client_id -- Unique client identifier.
+
+        Returns:
+            StaticDedupe -- Pre-trained deduper.
+
+        """
         default_settings = os.path.join("training-data", "dedupe_learned_settings")
         client_settings = os.path.join(
             "training-data", client_id, "dedupe_learned_settings"
@@ -23,11 +40,36 @@ class Deduplicate:
         return deduper
 
     def dedupe_prep(self, fields):
+        """Prepare a Dedupe instance.
+
+        Prepares a dedupe instance based on input data fields
+
+        Arguments:
+            fields {list} -- List of fields representing the input data columns.
+
+        Returns:
+            Dedupe -- New Deduper for further training
+
+        """
         logger.debug("Preparing deduper training phase %s", fields)
         fields = select_fields(fields)
         return dedupe.Dedupe(fields)
 
     def dedupe_pairs(self, deduper, pairs=6):
+        """Training pairs for labelling.
+
+        Selects a number of pairs for active labelling in the training phase.
+
+        Arguments:
+            deduper {Dedupe} -- Dedupe instance prepared with fields.
+
+        Keyword Arguments:
+            pairs {number} -- Number of labeling pairs to return (default: {6})
+
+        Returns:
+            list -- List of pairs to be matched.
+
+        """
         logger.debug("Retrieving pairs for active labeling")
 
         try:
@@ -44,10 +86,31 @@ class Deduplicate:
             return []
 
     def dedupe_mark(self, deduper, labelled_pairs):
+        """Mark labeled pairs.
+
+        Marks labelled pairs with the Dedupe instance for reinforcement training.
+
+        Arguments:
+            deduper {Deduper} -- Dudeper instance
+            labelled_pairs {list} -- List of pairs labeleld as distinct or a match
+
+        """
         logger.debug("Marking labelled training pairs")
         deduper.markPairs(labelled_pairs)
 
     def dedupe_sample(self, deduper, df, sample_size=0.3):
+        """Sample supplied DataFrame for training.
+
+        Selects a representative sample from the input DataFrame to be used in
+        the training phase.
+
+        Arguments:
+            deduper {[type]} -- [description]
+            df {DataFrame} -- [description]
+
+        Keyword Arguments:
+            sample_size {number} -- [description] (default: {0.3})
+        """
         df, data_dict = data_prep(df)
 
         logger.debug("Getting candidate training matches")

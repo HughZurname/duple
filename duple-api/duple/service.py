@@ -38,10 +38,10 @@ async def register(request):
 
 @routes.post("/existing")
 async def existing(request):
-    """File upload endpoint.
+    """File upload endpoint using existing model.
 
     ---
-    description: Recieves data for training and clasification.
+    description: Recieves data for deduplication.
     tags:
     - Upload
     produces:
@@ -318,6 +318,10 @@ async def reset(request):
 
 
 async def message_push(queue):
+    """Message handler for service messages.
+
+    Puts pending message items on to a queue to be sheduled for processing.
+    """
     while True:
         await asyncio.sleep(1)
         message = await app["message_queue"].get()
@@ -325,6 +329,10 @@ async def message_push(queue):
 
 
 async def on_startup(app):
+    """Startup background tasks.
+
+    Schedules message and worker coroutines.
+    """
     app["message_queue"] = asyncio.Queue()
     worker_queue = asyncio.Queue()
     asyncio.create_task(message_push(worker_queue))
@@ -345,6 +353,7 @@ async def on_shutdown(app, signal=None):
 
 
 def route_cors(host, app):
+    """Add cors to all routes for supplied host."""
     logger.info("Configuring cors")
     cors = aiohttp_cors.setup(
         app,
@@ -358,6 +367,11 @@ def route_cors(host, app):
 
 
 async def create_app():
+    """Create service app instance.
+
+    Creates and configures the duple service, sets up CORS and swagger and adds
+    the starup and shutdown processes.
+    """
     app.add_routes(routes)
     route_cors("*", app)
     setup_swagger(
@@ -384,6 +398,7 @@ async def create_app():
 
 
 def run():
+    """Duple service runnner."""
     logger.info("Starting duple.")
     web.run_app(create_app())
     logger.info("Duple successfully shutdown.")

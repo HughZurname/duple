@@ -41,22 +41,6 @@ def queue_put(mock_queue, mock_coro):
     return mock_put
 
 
-# @pytest.fixture
-# def mock_datastore(mocker, monkeypatch):
-#     mock_datastore = mocker.Mock()
-#     mock_deduper = mocker.PropertyMock()
-#     monkeypatch.setattr(datastore, "DataStore", mock_datastore)
-#     monkeypatch.setattr(datastore.DataStore, "deduper", mock_deduper)
-#     return mock_datastore.return_value
-
-
-# @pytest.fixture
-# def datastore_model(mock_datastore, mock_coro):
-#     mock_model, coro_model = mock_coro()
-#     datastore.model = coro_model
-#     return mock_model
-
-
 @pytest.fixture
 def model_message():
     return message_wrapper("123abc", {"use_model": True})
@@ -83,37 +67,12 @@ def train_message():
 def dedupe_message():
     return message_wrapper("123abc", {"training_complete": True})
 
+async def test_consumer():
+    assert False,  "TODO: Implement consumer tests"
 
 async def test_producer_model(model_message, event_loop, mock_queue, queue_put):
     await worker.producer(mock_queue, model_message)
     assert model_message.message_type == MessageType.MODEL
-
-
-# async def test_consumer_model(
-#     model_message,
-#     event_loop,
-#     mock_queue,
-#     mock_coro,
-#     queue_put,
-#     queue_get,
-# ):
-#     await worker.producer(mock_queue, model_message)
-#     assert model_message.message_type == MessageType.MODEL
-
-#     queue_get.side_effect = [model_message, Exception()]
-#     datastore_model = mock_coro("duple.datastore.DataStore.model")
-
-#     with pytest.raises(Exception):
-#         await worker.consumer(mock_queue)
-
-#     ret_tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
-
-#     assert 1 == len(ret_tasks)
-#     datastore_model.assert_not_called()
-
-#     await asyncio.gather(*ret_tasks)
-
-#     datastore_model.assert_called_once_with(model_message)
 
 
 async def test_producer_sample(sample_message, event_loop, mock_queue, queue_put):

@@ -1,6 +1,6 @@
 import pytest
 
-import duple
+
 from duple.datastore import DataStore, get_datastore, delete_datastore, datastore_repository
 
 

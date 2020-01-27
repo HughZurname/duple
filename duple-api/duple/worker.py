@@ -6,10 +6,7 @@ import duple.datastore as ds
 
 
 async def producer(queue, message):
-    """Process messagees and schedule worker work items.
-
-    [description]
-    """
+    """Process messagees and schedule worker work items."""
     logger.info(
         "Scheduling [%s] work item for client [%s] message [%s]",
         message.message_type.name,
@@ -43,10 +40,7 @@ async def producer(queue, message):
 
 
 async def consumer(queue):
-    """Consume scheduled work items.
-
-    [description]
-    """
+    """Consume scheduled work items."""
     while True:
         message = await queue.get()
         datastore = ds.get_datastore(message.client_id)
