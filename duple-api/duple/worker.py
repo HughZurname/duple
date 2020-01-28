@@ -51,7 +51,9 @@ async def consumer(queue):
             message.message_id,
         )
         if message.message_type == MessageType.MODEL:
-            await datastore.model(message.data.get("filepath"), message.client_id)
+            await datastore.model(
+                message.data.get("filepath"),
+                message.client_id)
             await datastore.dedupe()
             queue.task_done()
         if message.message_type == MessageType.SAMPLE:

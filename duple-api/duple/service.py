@@ -66,7 +66,9 @@ async def existing(request):
             size += len(chunk)
             f.write(chunk)
 
-    message = message_wrapper(client_id, {"use_model": True, "filepath": filepath})
+    message = message_wrapper(
+        client_id,
+        {"use_model": True, "filepath": filepath})
     await app["message_queue"].put(message)
 
     return web.json_response({"recieved": field.filename, "size": size})
@@ -137,7 +139,7 @@ async def training_post(request):
     """Training endpoint for submitting labelled data.
 
     ---
-    description: Accepts labelled data for training the duple data matching model.
+    description: Accepts labeled data for training the data matching model.
     tags:
     - Training
     produces:
@@ -179,7 +181,9 @@ async def training_post(request):
         if datastore.training_rounds < 4:
             logger.info("Updating traing pairs for labeling")
             labeled_pairs = await request.json()
-            message = message_wrapper(client_id, {"labeled_pairs": labeled_pairs})
+            message = message_wrapper(
+                client_id,
+                {"labeled_pairs": labeled_pairs})
             await app["message_queue"].put(message)
         else:
             message = message_wrapper(client_id, {"labeling_complete": True})
@@ -194,7 +198,7 @@ async def results(request):
     """Results endpoint for retrieving classified data.
 
     ---
-    description: Supplies clustered data containing duplicates found with the duple model.
+    description: Supplies clustered data containing duplicates.
     tags:
     - Results
     produces:
@@ -235,7 +239,7 @@ async def results_file(request):
     """Results endpoint for retrieving classified data results file.
 
     ---
-    description: Supplies a file containing duplicates found with the duple model.
+    description: Supplies a file containing duplicates found.
     tags:
     - Results
     produces:
@@ -268,7 +272,7 @@ async def stats(request):
     """Stats endpoint for retrieving classification statistics.
 
     ---
-    description: Supplies information reagarding the number of records processed and duplicates found.
+    description: Supplies information reagarding the records processed.
     tags:
     - Results
     produces:
