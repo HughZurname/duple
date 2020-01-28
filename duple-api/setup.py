@@ -4,9 +4,6 @@ setuptools.setup(
     name="duple",
     version="0.01",
     description="Data deduplicator using dedupe.io library and pandas",
-    url="http://github.com/HughZurname/duple",
-    author="Qonda Ltd.",
-    author_email="info@qonda.io",
     license="GNU GPLv3",
     install_requires=[
         "dedupe",

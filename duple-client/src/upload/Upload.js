@@ -67,7 +67,7 @@ const FileDropzone = props => {
                 isDragAccept,
                 isDragReject,
             })}>
-            <input {...getInputProps()} />
+            <input data-testid='file-upload' {...getInputProps()} />
             {uploadText(acceptedFiles)}
         </Container>
     )
