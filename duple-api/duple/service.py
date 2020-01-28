@@ -20,7 +20,7 @@ app = web.Application()
 
 @routes.get("/register")
 async def register(request):
-    """Registers a new client with duple.
+    """Register a new client with duple.
 
     ---
     description: Supplies a unique client identifier.
@@ -31,6 +31,14 @@ async def register(request):
     responses:
         "200":
             description: successful operation. Return client id.
+    parameters:
+      - in: header
+        name: clientId
+        schema:
+          type: string
+          format: uuid
+        required: true
+
     """
     client_id = shortuuid.uuid(request.headers.get("token"))
     return web.json_response({"clientId": client_id})
@@ -49,6 +57,14 @@ async def existing(request):
     responses:
         "200":
             description: successful operation. Return confirmation response.
+    parameters:
+      - in: header
+        name: clientId
+        schema:
+          type: string
+          format: uuid
+        required: true
+
     """
     client_id = request.headers.get("clientId")
     logger.debug("Recieving data for classification")
@@ -87,6 +103,14 @@ async def upload(request):
     responses:
         "200":
             description: successful operation. Return confirmation response.
+    parameters:
+      - in: header
+        name: clientId
+        schema:
+          type: string
+          format: uuid
+        required: true
+
     """
     client_id = request.headers.get("clientId")
     logger.debug("Recieving data for classification")
@@ -122,6 +146,14 @@ async def training_get(request):
     responses:
         "200":
             description: successful operation. Return unlabeled training records.
+    parameters:
+      - in: header
+        name: clientId
+        schema:
+          type: string
+          format: uuid
+        required: true
+
     """
     logger.debug("Training data request recieved")
     client_id = request.headers.get("clientId")
@@ -150,27 +182,33 @@ async def training_post(request):
         "400":
             description: Unsuccessful operation. Labelled date not supplied.
     parameters:
-    - in: body
-      name: body
-      description: Labelled training data
-      required: true
-      schema:
-        type: object
-        properties:
-          match:
-            type: array
-            items:
+      - in: header
+        name: clientId
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: body
+        name: body
+        description: Labelled training data
+        required: true
+        schema:
+          type: object
+          properties:
+            match:
               type: array
               items:
-                - $ref: '#/definitions/Person'
-                - $ref: '#/definitions/Person'
-          distinct:
-            type: array
-            items:
+                type: array
+                items:
+                  - $ref: '#/definitions/Person'
+                  - $ref: '#/definitions/Person'
+            distinct:
               type: array
               items:
-                - $ref: '#/definitions/Person'
-                - $ref: '#/definitions/Person'
+                type: array
+                items:
+                  - $ref: '#/definitions/Person'
+                  - $ref: '#/definitions/Person'
 
     """
     if request.body_exists and request.can_read_body:
@@ -206,6 +244,14 @@ async def results(request):
     responses:
         "200":
             description: successful operation. Return labeled results.
+    parameters:
+      - in: header
+        name: clientId
+        schema:
+          type: string
+          format: uuid
+        required: true
+
     """
     client_id = request.headers.get("clientId")
     datastore = get_datastore(client_id)
@@ -230,7 +276,7 @@ async def results(request):
                 .to_json(orient="table")
             )
             return web.Response(body=result, content_type="application/json")
-        if datastore.result.size <= 0:
+        if not datastore.has_result or datastore.result.size <= 0:
             return web.json_response({})
 
 
@@ -247,6 +293,14 @@ async def results_file(request):
     responses:
         "200":
             description: successful operation. Return labeled results file.
+    parameters:
+      - in: header
+        name: clientId
+        schema:
+          type: string
+          format: uuid
+        required: true
+
     """
     params = request.rel_url.query
     datastore = get_datastore(params.get("clientId"))
@@ -280,6 +334,14 @@ async def stats(request):
     responses:
         "200":
             description: successful operation. Return duple statistics.
+    parameters:
+      - in: header
+        name: clientId
+        schema:
+          type: string
+          format: uuid
+        required: true
+
     """
     client_id = request.headers.get("clientId")
     datastore = get_datastore(client_id)
@@ -302,6 +364,14 @@ async def reset(request):
     responses:
         "200":
             description: successful operation. Reset duple application data.
+    parameters:
+      - in: header
+        name: clientId
+        schema:
+          type: string
+          format: uuid
+        required: true
+
     """
     client_id = request.headers.get("clientId")
 
