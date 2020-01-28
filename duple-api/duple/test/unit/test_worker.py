@@ -2,7 +2,6 @@ import pytest
 
 from duple.message import message_wrapper, MessageType
 import duple.worker as worker
-# import duple.datastore as datastore
 
 
 @pytest.fixture
@@ -67,8 +66,10 @@ def train_message():
 def dedupe_message():
     return message_wrapper("123abc", {"training_complete": True})
 
+
 async def test_consumer():
-    assert False,  "TODO: Implement consumer tests"
+    assert False, "TODO: Implement consumer tests"
+
 
 async def test_producer_model(model_message, event_loop, mock_queue, queue_put):
     await worker.producer(mock_queue, model_message)

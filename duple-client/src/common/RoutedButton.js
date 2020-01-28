@@ -4,6 +4,7 @@ import { Button } from 'grommet'
 
 export default withRouter(props => {
     if (!props.to) return <Button {...props} />
+    if (props.disabled) return <Button {...props} />
 
     return (
         <Button

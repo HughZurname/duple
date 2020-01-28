@@ -145,11 +145,12 @@ const BaseForm = props => {
     )
 }
 
-const UploadForm = props => {
+const Upload = props => {
     const [modelType] = useSessionStorage('modelType')
     if (modelType === 'trained')
         return (
             <BaseForm
+                data-testid='trained-upload'
                 trained={true}
                 clientId={props.clientId}
                 postSettings={{
@@ -166,6 +167,7 @@ const UploadForm = props => {
     else
         return (
             <BaseForm
+                data-testid='training-upload'
                 clientId={props.clientId}
                 postSettings={{
                     url: '/upload',
@@ -181,4 +183,4 @@ const UploadForm = props => {
         )
 }
 
-export default UploadForm
+export default Upload

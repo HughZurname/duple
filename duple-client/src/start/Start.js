@@ -12,7 +12,7 @@ const Start = props => {
     const [, setTrainingComplete] = useSessionStorage('trainingComplete')
     const [modelType, setModelType] = useSessionStorage('modelType')
     return (
-        <Grommet theme={grommet}>
+        <Grommet theme={grommet} data-testid='start-component'>
             <Box direction='column' align='start' gap='small'>
                 <Text size='large'>
                     Welcome! To get started please select a a method below.
@@ -26,6 +26,7 @@ const Start = props => {
             </Box>
             <Box direction='row' justify='between' pad='medium'>
                 <RadioButtonGroup
+                    data-testid='method-radio'
                     name='radio'
                     options={[
                         { label: 'Use a pre-trained model', value: 'trained' },
@@ -43,6 +44,7 @@ const Start = props => {
                 margin={{ top: 'medium' }}>
                 <Button label='Clear' onClick={() => setModelType(null)} />
                 <Button
+                    data-testid='reset-button'
                     label='Reset'
                     onClick={() =>
                         fetchReset().then(response => {
@@ -55,9 +57,10 @@ const Start = props => {
                     }
                 />
                 <RoutedButton
+                    data-testid='start-button'
                     to='/upload'
                     label='Start'
-                    disabled={modelType === null}
+                    disabled={!Boolean(modelType)}
                     primary
                 />
             </Box>

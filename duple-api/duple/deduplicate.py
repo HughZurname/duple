@@ -91,7 +91,7 @@ class Deduplicate:
         Marks labelled pairs with the Dedupe instance for reinforcement training.
 
         Arguments:
-            deduper {Deduper} -- Dudeper instance
+            deduper {Dedupe} -- Dudeper instance
             labelled_pairs {list} -- List of pairs labeleld as distinct or a match
 
         """
@@ -105,11 +105,12 @@ class Deduplicate:
         the training phase.
 
         Arguments:
-            deduper {[type]} -- [description]
-            df {DataFrame} -- [description]
+            deduper {Dedupe} -- Active Deduper instance
+            df {DataFrame} -- DataFrame containing training + classification data
 
         Keyword Arguments:
-            sample_size {number} -- [description] (default: {0.3})
+            sample_size {number} -- Sample size used for training (default: {0.3})
+
         """
         df, data_dict = data_prep(df)
 
@@ -126,6 +127,15 @@ class Deduplicate:
         deduper.sample(data_dict, sample_num)
 
     def dedupe_train(self, deduper, client_id):
+        """Perform training on Dedupe with labeled examples.
+
+        Finalises the trainign phase after providing labeled examples.
+
+        Arguments:
+            deduper {Dedupe} -- Dedupe instance trained with labelled examples
+            client_id {str} -- Unique client identifier
+
+        """
         logger.debug("Finalising deduper training")
         deduper.train()
 
@@ -143,6 +153,22 @@ class Deduplicate:
             deduper.writeSettings(sf)
 
     def dedupe_deduplicate(self, deduper, df, recall_weight=1):
+        """Process DataFrame with clutered duplicates.
+
+        Classifies input dataframe and assigns clusters to expected duplicate
+        recrods along with confidence intervals.
+
+        Arguments:
+            deduper {Dedupe} -- [description]
+            df {DataFrame} -- [description]
+
+        Keyword Arguments:
+            recall_weight {number} -- Weighting for precision vs. recall (default: {1})
+
+        Returns:
+            DataFrame, number -- The results DataFrame and the number of duplicates
+
+        """
         logger.debug("Preparing deduper results")
         df, data_d = data_prep(df)
         try:

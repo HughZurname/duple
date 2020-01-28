@@ -32,7 +32,8 @@ const App = props => {
                     pad={{ vertical: 'xsmall', horizontal: 'medium' }}
                     justify='between'
                     background='brand'
-                    style={{ zIndex: '1000' }}>
+                    style={{ zIndex: '1000' }}
+                    data-testid='header'>
                     <Heading level={3} margin='none' color='white'>
                         <RoutedAnchor
                             to='/'

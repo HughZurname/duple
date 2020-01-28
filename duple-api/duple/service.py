@@ -54,8 +54,6 @@ async def existing(request):
     logger.debug("Recieving data for classification")
     reader = await request.multipart()
     field = await reader.next()
-    assert field.name == "duple_data"
-    assert field.headers["Content-Type"] == "text/csv" or "application/vnd.ms-excel"
     filepath = os.path.join("profile-data/", client_id, field.filename)
     size = 0
 
@@ -92,8 +90,6 @@ async def upload(request):
     logger.debug("Recieving data for classification")
     reader = await request.multipart()
     field = await reader.next()
-    assert field.name == "duple_data"
-    assert field.headers["Content-Type"] == "text/csv" or "application/vnd.ms-excel"
     filepath = os.path.join("profile-data/", client_id, field.filename)
     size = 0
 
