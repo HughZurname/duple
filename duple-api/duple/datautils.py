@@ -17,7 +17,6 @@ def data_prep(df):
 def data_cluster(deduper, data_dict, threshold):
     logger.debug("Clustering data")
     duplicates = deduper.match(data_dict, threshold)
-    logger.info("Testing deduper duplicates: %s", duplicates)
     logger.debug("Duplicate records found: %d", len(duplicates))
 
     df_data = [

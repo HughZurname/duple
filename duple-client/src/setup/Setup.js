@@ -3,16 +3,16 @@ import React from 'react'
 import { Grommet, Box, RadioButtonGroup, Button, Text } from 'grommet'
 import { grommet } from 'grommet/themes'
 
-import { fetchReset, useSessionStorage, RoutedButton } from '../common'
+import { fetchReset, useSessionStorage, RoutedButton, Wrapper } from '../common'
 
-const Start = props => {
+const Setup = props => {
     const [, setPositiveIds] = useSessionStorage('positiveIds')
     const [, setNegativeIds] = useSessionStorage('negativeIds')
     const [, setAttempts] = useSessionStorage('attempts')
     const [, setTrainingComplete] = useSessionStorage('trainingComplete')
     const [modelType, setModelType] = useSessionStorage('modelType')
     return (
-        <Grommet theme={grommet} data-testid='start-component'>
+        <Wrapper data-testid='start-component'>
             <Box direction='column' align='start' gap='small'>
                 <Text size='large'>
                     Welcome! To get started please select a a method below.
@@ -64,8 +64,8 @@ const Start = props => {
                     primary
                 />
             </Box>
-        </Grommet>
+        </Wrapper>
     )
 }
 
-export default Start
+export default Setup

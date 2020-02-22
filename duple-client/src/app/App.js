@@ -12,9 +12,9 @@ import {
 } from 'grommet-icons'
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css'
 
-import { RoutedAnchor } from '../common'
+import { RoutedAnchor, Wrapper } from '../common'
 
-import { Start } from '../start'
+import { Setup } from '../setup'
 import { Upload } from '../upload'
 import { Training } from '../training'
 import { Results } from '../results'
@@ -25,7 +25,7 @@ const App = props => {
 
     return (
         <Router>
-            <Grommet theme={grommet} full>
+            <Wrapper>
                 <Header
                     direction='row'
                     align='center'
@@ -71,7 +71,7 @@ const App = props => {
                         </Box>
                     </Drop>
                 )}
-                <Main pad='small'>
+                <Main>
                     <Switch>
                         <Route path='/training'>
                             <Training totalAttempts={4} />
@@ -83,11 +83,11 @@ const App = props => {
                             <Results />
                         </Route>
                         <Route path='/'>
-                            <Start />
+                            <Setup />
                         </Route>
                     </Switch>
                 </Main>
-            </Grommet>
+            </Wrapper>
         </Router>
     )
 }

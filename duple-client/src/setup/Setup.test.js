@@ -2,13 +2,13 @@ import React from 'react'
 import { Router } from 'react-router-dom'
 import { createMemoryHistory } from 'history'
 import { render, fireEvent } from '@testing-library/react'
-import Start from './Start'
+import Setup from './Setup'
 
 test('navigates to /upload when a model method is selected', () => {
     const history = createMemoryHistory()
     const { container, getByTestId } = render(
         <Router history={history}>
-            <Start />
+            <Setup />
         </Router>
     )
     expect(container.innerHTML).toMatch('Welcome')
@@ -25,7 +25,7 @@ test('makes a reset request when reset is clicked', () => {
     const history = createMemoryHistory()
     const { container, getByTestId } = render(
         <Router history={history}>
-            <Start />
+            <Setup />
         </Router>
     )
     fireEvent.click(getByTestId('reset-button'))
