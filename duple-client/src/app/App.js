@@ -1,8 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 
-import { Grommet, Main, Box, Drop, Heading, Header } from 'grommet'
-import { grommet } from 'grommet/themes'
+import { Main, Box, Drop, Heading, Header } from 'grommet'
 import {
     Home,
     Notification,

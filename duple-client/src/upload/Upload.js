@@ -1,11 +1,23 @@
-import React, { useCallback } from 'react'
+// ----------------------------------------------
+// TODO: This needs up be updated with the right
+// component when the PR related to this isssue
+// is resolved. Will probsably need to be a form
+// ----------------------------------------------
+// https://github.com/grommet/grommet/issues/2535
+// ----------------------------------------------
+
+import React, { useCallback, useState, useEffect } from 'react'
 import { useDropzone } from 'react-dropzone'
 
-import { Grommet, Box, Heading, Text, Button, Layer } from 'grommet'
-import { grommet } from 'grommet/themes'
+import { Box, Heading, Text, Button, Layer } from 'grommet'
 import styled from 'styled-components'
 
-import { RoutedButton, useSessionStorage, useDupleFetch } from '../common'
+import {
+    RoutedButton,
+    useSessionStorage,
+    Wrapper,
+    useDupleFetch,
+} from '../common'
 
 const getColor = props => {
     if (props.isDragAccept) return '#00e676'
@@ -29,16 +41,13 @@ const Container = styled.div`
     transition: border 0.24s ease-in-out;
 `
 
-const FileDropzone = props => {
-    const setFiles = props.setFiles
-
+const FileDropzone = ({ files, setFiles, text, setText }) => {
     const onDropAccepted = useCallback(
         acceptedFiles => {
             setFiles(acceptedFiles)
         },
         [setFiles]
     )
-
     const {
         getRootProps,
         getInputProps,
@@ -49,17 +58,15 @@ const FileDropzone = props => {
         accept: 'text/csv, application/vnd.ms-excel',
         multiple: false,
         onDropAccepted,
+        noClick: files.length,
     })
 
-    const uploadText = files => {
-        if (files.length > 0)
-            return (
-                <Text>
-                    {files[0].path} ({files[0].size} bytes)
-                </Text>
+    useEffect(() => {
+        if (acceptedFiles.length > 0)
+            setText(
+                acceptedFiles.map(file => `${file.path} (${file.size} bytes)`)
             )
-        else return <Text>Drop your data file here, or click to select...</Text>
-    }
+    }, [acceptedFiles, setText])
 
     return (
         <Container
@@ -68,7 +75,7 @@ const FileDropzone = props => {
                 isDragReject,
             })}>
             <input data-testid='file-upload' {...getInputProps()} />
-            {uploadText(acceptedFiles)}
+            <Text>{text}</Text>
         </Container>
     )
 }
@@ -76,7 +83,10 @@ const FileDropzone = props => {
 const BaseForm = props => {
     const formData = new FormData()
     const postData = useDupleFetch(props.postSettings)
-    const [files, setFiles] = React.useState([])
+    const [files, setFiles] = useState([])
+    const [text, setText] = useState(
+        'Drop your data file here, or click to select...'
+    )
 
     const [uploadSuccess, setUploadSuccess] = useSessionStorage(
         'uploadSuccess',
@@ -96,14 +106,15 @@ const BaseForm = props => {
     }
 
     return (
-        <Grommet theme={grommet}>
+        <Wrapper>
             {uploadSuccess && (
                 <Layer full>
                     <Box
                         fill
                         background='light-1'
                         align='center'
-                        justify='center'>
+                        justify='center'
+                        pad='small'>
                         <Text>{props.progressText}</Text>
                         <Box
                             direction='row'
@@ -121,16 +132,31 @@ const BaseForm = props => {
                     </Box>
                 </Layer>
             )}
-            <Box fill align='center' justify='center'>
+            <Box fill align='center' pad='small'>
                 <Box width='full'>
                     <Heading size='small'>Upload</Heading>
                     <form onSubmit={handleSubmit}>
-                        <FileDropzone setFiles={setFiles} />
+                        <FileDropzone
+                            files={files}
+                            setFiles={setFiles}
+                            text={text}
+                            setText={setText}
+                        />
                         <Box
                             direction='row'
                             justify='center'
                             gap='small'
                             margin={{ top: 'medium' }}>
+                            <Button
+                                label='Clear'
+                                disabled={files.length === 0}
+                                onClick={() => {
+                                    setFiles([])
+                                    setText(
+                                        'Drop your data file here, or click to select...'
+                                    )
+                                }}
+                            />
                             <Button
                                 type='submit'
                                 label='Upload'
@@ -141,7 +167,7 @@ const BaseForm = props => {
                     </form>
                 </Box>
             </Box>
-        </Grommet>
+        </Wrapper>
     )
 }
 

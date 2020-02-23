@@ -1,7 +1,6 @@
 import React from 'react'
 
-import { Grommet, DataTable, CheckBox } from 'grommet'
-import { grommet } from 'grommet/themes'
+import { DataTable, CheckBox } from 'grommet'
 
 import TrainingPair from './TrainingPair'
 
@@ -43,43 +42,37 @@ const TrainingTable = props => {
     }
 
     return (
-        <Grommet theme={grommet}>
-            <DataTable
-                style={{ width: '100%' }}
-                columns={[
-                    ...columns,
-                    {
-                        property: 'positiveIds',
-                        render: datum => (
-                            <CheckBox
-                                key={datum.pair_id}
-                                checked={
-                                    positiveIds.indexOf(datum.pair_id) !== -1
-                                }
-                                onChange={e => onPositive(e, datum.pair_id)}
-                            />
-                        ),
-                        header: 'Correct',
-                        sortable: false,
-                    },
-                    {
-                        property: 'negativeIds',
-                        render: datum => (
-                            <CheckBox
-                                key={datum.pair_id}
-                                checked={
-                                    negativeIds.indexOf(datum.pair_id) !== -1
-                                }
-                                onChange={e => onNegative(e, datum.pair_id)}
-                            />
-                        ),
-                        header: 'Incorrect',
-                        sortable: false,
-                    },
-                ].map(col => ({ ...col }))}
-                data={props.data}
-            />
-        </Grommet>
+        <DataTable
+            style={{ width: '100%' }}
+            columns={[
+                ...columns,
+                {
+                    property: 'positiveIds',
+                    render: datum => (
+                        <CheckBox
+                            key={datum.pair_id}
+                            checked={positiveIds.indexOf(datum.pair_id) !== -1}
+                            onChange={e => onPositive(e, datum.pair_id)}
+                        />
+                    ),
+                    header: 'Correct',
+                    sortable: false,
+                },
+                {
+                    property: 'negativeIds',
+                    render: datum => (
+                        <CheckBox
+                            key={datum.pair_id}
+                            checked={negativeIds.indexOf(datum.pair_id) !== -1}
+                            onChange={e => onNegative(e, datum.pair_id)}
+                        />
+                    ),
+                    header: 'Incorrect',
+                    sortable: false,
+                },
+            ].map(col => ({ ...col }))}
+            data={props.data}
+        />
     )
 }
 

@@ -48,6 +48,9 @@ const statsMachine = Machine({
             },
         },
     },
+    actions: {
+        notifySuccess: ctx => console.log('Results: ', ctx.data),
+    },
 })
 
 export default statsMachine

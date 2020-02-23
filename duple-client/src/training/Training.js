@@ -1,7 +1,6 @@
 import React from 'react'
 
-import { Grommet, Box, Layer, Text } from 'grommet'
-import { grommet } from 'grommet/themes'
+import { Box, Layer, Text } from 'grommet'
 import Loader from 'react-loader-spinner'
 
 import {
@@ -9,6 +8,7 @@ import {
     useDupleFetch,
     fetchReset,
     RoutedButton,
+    Wrapper,
 } from '../common'
 
 import TrainingTable from './TrainingTable'
@@ -52,8 +52,7 @@ const Training = props => {
     })
 
     return (
-        <Grommet theme={grommet}>
-            {console.log('Dicks', getTraining.data)}
+        <Wrapper>
             <TrainingStatus
                 fetching={getTraining.fetching || postTraining.fetching}
                 positiveIds={positiveIds}
@@ -147,7 +146,7 @@ const Training = props => {
                     </Text>
                 </Box>
             )}
-        </Grommet>
+        </Wrapper>
     )
 }
 

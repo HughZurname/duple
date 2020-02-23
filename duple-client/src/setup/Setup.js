@@ -1,7 +1,6 @@
 import React from 'react'
 
-import { Grommet, Box, RadioButtonGroup, Button, Text } from 'grommet'
-import { grommet } from 'grommet/themes'
+import { Box, RadioButtonGroup, Button, Text } from 'grommet'
 
 import { fetchReset, useSessionStorage, RoutedButton, Wrapper } from '../common'
 
@@ -13,7 +12,7 @@ const Setup = props => {
     const [modelType, setModelType] = useSessionStorage('modelType')
     return (
         <Wrapper data-testid='start-component'>
-            <Box direction='column' align='start' gap='small'>
+            <Box direction='column' align='start' gap='small' pad='small'>
                 <Text size='large'>
                     Welcome! To get started please select a a method below.
                     Select 'Use a pre-trained model' and click 'Start' to have

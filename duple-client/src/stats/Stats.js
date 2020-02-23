@@ -3,7 +3,6 @@ import { useMachine } from '@xstate/react'
 import { Redirect } from 'react-router-dom'
 
 import { Box, Button, Text } from 'grommet'
-import { Wrapper } from '../common'
 
 import statsMachine from './statsMachine'
 
@@ -49,7 +48,7 @@ const Stats = ({ onResolve }) => {
     switch (state.value) {
         case 'loading':
             return (
-                <Box direction='row' justify='between' pad='medium'>
+                <Box direction='row' justify='between' pad='small'>
                     <Text>Loading...</Text>
                     <Actions loading={false}>
                         <Button
@@ -71,7 +70,7 @@ const Stats = ({ onResolve }) => {
             )
         case 'success':
             return (
-                <Box direction='row' justify='between' pad='medium'>
+                <Box direction='row' justify='between' pad='small'>
                     <Records records={state.context.data.records} />
                     <Actions loading={false}>
                         <Button
@@ -93,7 +92,7 @@ const Stats = ({ onResolve }) => {
             )
         case 'failure':
             return (
-                <Box direction='row' justify='between' pad='medium'>
+                <Box direction='row' justify='between' pad='small'>
                     <Text>Failed!</Text>
                     <Actions loading={false}>
                         <Button
