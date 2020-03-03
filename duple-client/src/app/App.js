@@ -1,7 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 
-import { Main, Box, Drop, Heading, Header } from 'grommet'
+import { Main, Box, Drop, Heading, Nav } from 'grommet'
 import {
     Home,
     Notification,
@@ -25,10 +25,9 @@ const App = props => {
     return (
         <Router>
             <Wrapper>
-                <Header
+                <Nav
                     direction='row'
                     align='center'
-                    pad={{ vertical: 'xsmall', horizontal: 'medium' }}
                     justify='between'
                     background='brand'
                     style={{ zIndex: '1000' }}
@@ -59,7 +58,7 @@ const App = props => {
                             icon={<Notification />}
                         />
                     </Box>
-                </Header>
+                </Nav>
                 {openNotification && (
                     <Drop
                         style={{ borderRadius: 15 }}

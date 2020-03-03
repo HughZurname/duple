@@ -34,7 +34,12 @@ const statsMachine = Machine({
             },
         },
         success: {
-            entry: 'notifySuccess',
+            entry: ctx => console.log('Stats: ', ctx.data),
+            on: {
+                DOWNLOAD: 'download',
+            },
+        },
+        download: {
             on: {
                 DONE: 'done',
             },
@@ -43,13 +48,11 @@ const statsMachine = Machine({
             type: 'final',
         },
         failure: {
+            entry: ctx => console.error('Failure: ', ctx),
             on: {
                 RETRY: 'loading',
             },
         },
-    },
-    actions: {
-        notifySuccess: ctx => console.log('Results: ', ctx.data),
     },
 })
 

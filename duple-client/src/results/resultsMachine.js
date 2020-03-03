@@ -34,7 +34,7 @@ const resultsMachine = Machine({
             },
         },
         success: {
-            entry: 'notifySuccess',
+            entry: ctx => console.log('Results: ', ctx.data),
             on: {
                 DONE: 'done',
             },
@@ -43,13 +43,11 @@ const resultsMachine = Machine({
             type: 'final',
         },
         failure: {
+            entry: ctx => console.error('Failure: ', ctx),
             on: {
                 RETRY: 'loading',
             },
         },
-    },
-    actions: {
-        notifySuccess: ctx => console.log('Results: ', ctx.data),
     },
 })
 

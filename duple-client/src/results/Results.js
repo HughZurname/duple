@@ -71,13 +71,17 @@ const Results = ({ onResolve }) => {
         case 'failure':
             return (
                 <Box align='center' margin='xlarge' gap='large'>
+                    <Text>Request failed! Please retry.</Text>
+                </Box>
+            )
+        default:
+            return (
+                <Box align='center' margin='xlarge' gap='large'>
                     <Text>
                         No duplicates found. Please try with another dataset
                     </Text>
                 </Box>
             )
-        default:
-            return null
     }
 }
 

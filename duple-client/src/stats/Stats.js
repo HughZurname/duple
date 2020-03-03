@@ -9,21 +9,21 @@ import statsMachine from './statsMachine'
 const Stats = ({ onResolve }) => {
     const [state, send, service] = useMachine(statsMachine)
 
-    const Actions = props => (
+    const Actions = ({ children }) => (
         <Box direction='column' align='center' gap='small'>
             <Text style={{ width: '8em', textAlign: 'center' }} size='large'>
                 Results
             </Text>
             <Box direction='row' gap='medium'>
-                {props.children}
+                {children}
             </Box>
         </Box>
     )
 
-    const Records = props => (
+    const Records = ({ records }) => (
         <Box direction='column' align='center' gap='small'>
             <Text style={{ width: '8em', textAlign: 'start' }} size='medium'>
-                {props.records}
+                {records}
             </Text>
             <Text style={{ width: '8em', textAlign: 'start' }}>
                 records processed
@@ -31,13 +31,13 @@ const Stats = ({ onResolve }) => {
         </Box>
     )
 
-    const Duplicates = props => (
+    const Duplicates = ({ duplicates }) => (
         <Box direction='column' align='center' gap='small'>
             <Text
                 weight='bold'
                 style={{ width: '8em', textAlign: 'end' }}
                 size='medium'>
-                {props.duplicates}
+                {duplicates}
             </Text>
             <Text weight='bold' style={{ width: '8em', textAlign: 'end' }}>
                 duplicates found
@@ -51,19 +51,8 @@ const Stats = ({ onResolve }) => {
                 <Box direction='row' justify='between' pad='small'>
                     <Text>Loading...</Text>
                     <Actions loading={false}>
-                        <Button
-                            primary
-                            disabled={true}
-                            gap='medium'
-                            label='Download'
-                            onClick={() => send('RETRY')}
-                        />
-                        <Button
-                            disabled={true}
-                            color='accent-1'
-                            label='Done'
-                            onClick={() => send('DONE')}
-                        />
+                        <Button disabled={true} gap='medium' label='Download' />
+                        <Button primary disabled={true} label='Done' />
                     </Actions>
                     <Text>Loading...</Text>
                 </Box>
@@ -74,15 +63,28 @@ const Stats = ({ onResolve }) => {
                     <Records records={state.context.data.records} />
                     <Actions loading={false}>
                         <Button
-                            primary
                             disabled={false}
                             gap='medium'
                             label='Download'
-                            onClick={() => send('RETRY')}
+                            href={`http://localhost:8080/results/file?clientId=${window.localStorage.getItem(
+                                'clientId'
+                            )}`}
+                            onClick={() => send('DOWNLOAD')}
                         />
+                        <Button primary disabled={true} label='Done' />
+                    </Actions>
+                    <Duplicates duplicates={state.context.data.duplicates} />
+                </Box>
+            )
+        case 'download':
+            return (
+                <Box direction='row' justify='between' pad='small'>
+                    <Records records={state.context.data.records} />
+                    <Actions loading={false}>
+                        <Button disabled={true} gap='medium' label='Download' />
                         <Button
+                            primary
                             disabled={false}
-                            color='accent-1'
                             label='Done'
                             onClick={() => send('DONE')}
                         />
@@ -96,17 +98,15 @@ const Stats = ({ onResolve }) => {
                     <Text>Failed!</Text>
                     <Actions loading={false}>
                         <Button
-                            primary
                             disabled={false}
-                            gap='medium'
-                            label='Download'
+                            label='Retry'
                             onClick={() => send('RETRY')}
                         />
                         <Button
+                            primary
                             disabled={false}
-                            color='accent-1'
                             label='Done'
-                            onClick={() => send('RETRY')}
+                            onClick={() => send('DONE')}
                         />
                     </Actions>
                     <Text>Failed!</Text>

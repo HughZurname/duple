@@ -73,7 +73,6 @@ const Training = props => {
                             ),
                         })
                         .then(response => {
-                            console.log(response)
                             if (response.ok) {
                                 if (attempts < props.totalAttempts) {
                                     setAttempts(attempts + 1)
